@@ -12,9 +12,13 @@
 > **Ship a production-grade foundation: the same one-joke app, but with error handling, accessibility, tests, and build tooling — deployed to Vercel.**
 > No new features. Same functionality as the tutorial, but resilient, accessible, tested, and deployed.
 
-**Verdict: ✅ Goal Met**
+**Verdict: ✅ Goal Met — with a post-sprint deployment fix required**
 
-Every item in the Definition of Done was completed. All 14 work tickets shipped. 13 PRs merged. 55 tests passing. Vercel deployment config ready. The one manual step outstanding — actually clicking "Import Project" in the Vercel dashboard — is by design (requires Joe's credentials).
+Every item in the Definition of Done was completed in code. All 14 work tickets shipped. 13 PRs merged. 55 tests passing. Vercel deployment config ready. However, the actual deployment surfaced two bugs that required fixes after the sprint closed:
+
+1. **PRs #24–#28 never landed on `main`** — the stacked PR strategy (each PR targeting its parent feature branch rather than `main`) meant GitHub marked them "merged" into intermediate branches, not into `main`. Vercel built from `main` and got a half-complete codebase (commit `788f5c3`). Fixed post-sprint by merging `15-deploy-vercel` directly into `main`.
+
+2. **Vercel built from the repo root, not the project subdirectory** — without a root-level `vercel.json` specifying `rootDirectory`, Vercel tried to build `50-projects-revisited/` as if it were the Vite project. Fixed post-sprint with a root `vercel.json`. The Vercel dashboard `Root Directory` setting is also required as a belt-and-braces fix.
 
 ---
 
@@ -97,8 +101,8 @@ Every item in the Definition of Done was completed. All 14 work tickets shipped.
 
 ### ✅ What Went Well
 
-**1. The dependency chain worked perfectly as a stacked PR strategy.**
-The sprint plan's "waves" translated directly into stacked branches. Each ticket could be reviewed in isolation while building on its dependencies. The gate pattern (baseline tests before any behaviour changes) meant the XSS fix and accessibility work had a safety net from day one.
+**1. The dependency chain worked perfectly as an isolation strategy.**
+The sprint plan's "waves" translated directly into stacked branches. Each ticket could be worked and tested in isolation while building on its dependencies. The gate pattern (baseline tests before any behaviour changes) meant the XSS fix and accessibility work had a safety net from day one. The *branching* strategy was sound; the *merge* strategy was not (see What Didn't Go Well).
 
 **2. The decision to front-load the spike (#2) paid off immediately.**
 Knowing that User-Agent was no longer a forbidden header and that @fontsource was the right font strategy eliminated uncertainty from every subsequent ticket. The spike took 30 minutes and saved hours of potential rework.
@@ -123,13 +127,20 @@ A context window reset between sessions meant the UI test run initially happened
 **2. Ticket #4 (migrate code) was effectively a ghost ticket.**
 The migration was so minimal (20-line `script.js` decomposed into modules) that it was done inside ticket #3. Ticket #4 ended up being CHANGELOG.md + a PR reference. In future sprints, these should be merged into the scaffold ticket at planning time or explicitly called out as "will be done in #3."
 
-**3. The stacked PR branching strategy creates a fragile merge sequence.**
-With 13 PRs stacked in a chain, the merge order matters critically. If any PR is merged out of order, every downstream branch needs rebasing. A solo developer workflow can handle this, but it's worth noting for the content series — this is a real pain point that a GitHub Project board + auto-merge rules would solve.
+**3. The stacked PR strategy broke the deployment — silently.**
+This is the biggest failure of the sprint. PRs #24–#28 each targeted their parent feature branch (e.g. PR #25 targeted `8-loading-state`, not `main`). GitHub marked them "MERGED" — which is technically true, they were merged into the chain — but none of that work ever landed on `main`. When Vercel deployed from `main`, it built a codebase missing the loading state, error messages, CSP, all 55 tests, and the vercel.json security headers.
 
-**4. The OG image is a placeholder SVG that won't work on most platforms.**
+The failure was invisible during the sprint because the branching strategy looked correct in isolation. It only became apparent when the actual deployment revealed a half-baked app. The fix required two post-sprint commits: merging `15-deploy-vercel` into `main`, and adding a root-level `vercel.json` with `rootDirectory`.
+
+The sprint-run workflow as designed doesn't account for this: it creates branches and PRs correctly, but assumes each PR will be merged to `main` before the next sprint starts. When that doesn't happen — because the human reviews PRs in bulk at the end — the whole chain stays off `main` indefinitely. The workflow needs an explicit "flush to main" step.
+
+**4. The repo root not being the project root was never addressed in the sprint.**
+Ticket #15 created `vercel.json` *inside* `projects/dad-jokes/refactored/`, which is correct once Vercel knows to look there. But it never handled the question "how does Vercel know this monorepo structure exists?" That required a root-level `vercel.json` with `rootDirectory` — which wasn't in any ticket. The PR description mentioned "manual steps for Joe" but didn't spell out the root directory setting clearly enough to catch the problem before deployment.
+
+**5. The OG image is a placeholder SVG that won't work on most platforms.**
 Most social platforms (Facebook, Twitter/X, LinkedIn, Slack) require a PNG or JPEG for OG images — SVG is not supported. This was noted in the PR but should have been a ticket, not a note. It means the meta tags exist but the link preview won't have an image on most platforms.
 
-**5. The CHANGELOG.md got stale immediately.**
+**6. The CHANGELOG.md got stale immediately.**
 It was written to capture the scaffold/migration, then never updated as the sprint progressed. By the end of the sprint it's a partial record. This isn't critical but it means the changelog isn't useful as a "what changed in this sprint" document.
 
 ### 🤔 What Surprised Us
@@ -154,14 +165,17 @@ The jsdom ESM incompatibility with Node 22.9.0 was a potential sprint-stopper. T
 **1. Checkpoint mid-sprint with a git status summary.**
 Before continuing a session that might have lost context, run `git branch --show-current` and `git log --oneline -3` to confirm we're on the right branch. Add this to the sprint-run workflow.
 
-**2. Merge PRs before starting the next sprint.**
-The stacked PR chain creates a coordination overhead for Joe. Consider a policy: Joe reviews and merges the chain between sprints, and Sprint 2 starts clean from `main`. This also makes the CHANGELOG useful.
+**2. Merge PRs to `main` before triggering any deployment — and before starting the next sprint.**
+The stacked PR chain looked complete on GitHub ("13 PRs merged") but `main` was missing half the sprint. The rule going forward: after sprint-run finishes, Joe merges the full chain in dependency order before connecting any deployment service. The sprint-run execution log should include a "merge order" section (it did — follow it). Additionally, sprint-review should not be marked complete until `git log origin/main` confirms the tip matches the final sprint commit. For Sprint 2, the sprint-run workflow will also include a `git log --oneline origin/main` check before closing.
 
 **3. Spike before each sprint, not just Sprint 1.**
 The Sprint 1 spike (#2) was invaluable. Sprint 2 should have a similar spike for the new features — especially Web Share API browser support and localStorage patterns. A 30-minute spike prevents 3-hour reworks.
 
-**4. Add a "done = deployed" gate.**
-The Definition of Done includes "deployed to Vercel" but it's the only item that requires manual action. For Sprint 2, structure this as: Joe deploys after merging, confirms it works, then runs sprint-review. The review shouldn't happen before the deploy is confirmed.
+**4. Any monorepo project needs a root-level `vercel.json` with `rootDirectory` — add it in the scaffold ticket.**
+This should have been in ticket #3 (scaffold) or at worst ticket #15 (deploy). A monorepo's Vercel config must live at the repo root, not inside the project subfolder. Ticket #15 put `vercel.json` in the right place for when Vercel *already knows* the root — but never handled the bootstrapping problem. For Sprint 2 and all future projects: the scaffold ticket includes a root-level `vercel.json` with `rootDirectory`, `framework`, `buildCommand`, and `outputDirectory`. Also set `Root Directory` in the Vercel dashboard settings as a belt-and-braces redundancy.
+
+**5. Add a "done = deployed and verified" gate.**
+The Definition of Done said "deployed to Vercel" but the sprint-review ran before the deployment was actually verified working. Going forward: sprint-review only runs after Joe has confirmed the live URL loads correctly in a browser. Add this as an explicit step in the sprint-review skill prompt.
 
 **5. Fix the OG image properly in Sprint 2 setup.**
 Create a proper PNG or JPEG OG image (1200×630) before Sprint 2 ships. This could be as simple as a screenshot-to-PNG or a Satori-generated image. It's a small thing that makes the content series more professional.
@@ -242,16 +256,22 @@ The original Phase 2 list is still correct but needs sequencing:
 **Estimated size:** 2 Large, 6 Medium, 4 Small ≈ similar scale to Sprint 1
 
 ### Carry-Over Items
-- **Vercel deployment** — Joe needs to manually connect the repo and click deploy. This is the only item that couldn't be automated. It's a prerequisite for Sprint 2.
-- **OG image PNG** — noted as deferred. Should be first task of Sprint 2 or done in the sprint gap.
+- **Vercel deployment verification** — root `vercel.json` is now in place and `main` has the full sprint. Joe needs to: (1) set `Root Directory: projects/dad-jokes/refactored` in the Vercel dashboard, (2) trigger a redeploy, (3) confirm the live URL works before Sprint 2 begins.
+- **OG image PNG** — noted as deferred in Sprint 1. First task of Sprint 2.
 - **CHANGELOG.md update** — needs a full pass to document all Sprint 1 changes properly.
+
+### Post-Sprint Fixes Applied
+- Merged `15-deploy-vercel` → `main` (brought PRs #24–#28 onto main)
+- Added root-level `vercel.json` with `rootDirectory: "projects/dad-jokes/refactored"` and all security headers
 
 ---
 
 ## Summary
 
-Sprint 1 was a clean execution. 14 tickets, 13 PRs, 55 tests, 97% coverage, ~500ms test runtime, 1.57KB JS payload. The AI handled the full sprint autonomously — branch per ticket, PR per ticket, stacked dependencies managed correctly — with one context-loss incident that was caught and recovered quickly.
+Sprint 1 delivered everything it promised in code — 14 tickets, 13 PRs, 55 tests, 97% coverage, 500ms test runtime, 1.57KB JS payload — but surfaced a workflow gap when the actual deployment ran: stacked PRs that targeted feature branches instead of `main` meant half the sprint's work was missing from the branch Vercel built from. Two post-sprint commits fixed it.
 
-The most important thing Sprint 1 proves is that the workflow works: expert reviews → decisions → sprint plan → sprint run produces a coherent, production-quality output without requiring the human to be in the loop for every decision. Joe's role was PR review and merge. That's the right division of labour.
+The lesson isn't that stacked PRs are wrong. The lesson is that the sprint workflow needs an explicit "flush to main and verify" gate between sprint-run and sprint-review, and that monorepo deployments need root-level config in the scaffold ticket, not the deploy ticket.
 
-Sprint 2 is where the app gets interesting. The foundation is solid.
+The code quality and the autonomous execution were both genuinely impressive. The process gap was a gap in the workflow design, not the AI's work. That's fixable — and now documented so it doesn't happen in Sprint 2.
+
+Sprint 2 is where the app gets interesting. The foundation is solid, and it's now actually deployed.
