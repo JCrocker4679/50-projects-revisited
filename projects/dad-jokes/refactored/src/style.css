@@ -113,4 +113,49 @@ h3 {
 /* Error state */
 .joke--error {
   color: #c0392b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-message {
+  display: block;
+}
+
+.retry-btn {
+  background-color: #c0392b;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.retry-btn:hover {
+  background-color: #a93226;
+}
+
+.retry-btn:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.fallback-label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.fallback-joke {
+  display: block;
+  font-size: 22px;
+  color: #333;
+  font-style: italic;
 }

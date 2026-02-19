@@ -2,7 +2,7 @@
  * UI rendering functions.
  *
  * All DOM updates go through this module.
- * Uses textContent (not innerHTML) to prevent XSS.
+ * DOM elements are created programmatically (not innerHTML) to prevent XSS.
  */
 
 /** Error message copy per DECISIONS.md D14 */
@@ -12,6 +12,17 @@ const ERROR_MESSAGES: Record<string, string> = {
   timeout: 'Request timed out — the joke servers might be slow.',
   validation: 'Something went sideways. Try again?',
 };
+
+/** Callback for retry button clicks, set via setRetryHandler */
+let retryHandler: (() => void) | null = null;
+
+/**
+ * Register the retry callback.
+ * Called once from main.ts at init time.
+ */
+export function setRetryHandler(handler: () => void): void {
+  retryHandler = handler;
+}
 
 /**
  * Show loading state.
@@ -68,17 +79,51 @@ export function renderJoke(jokeText: string): void {
 }
 
 /**
- * Display an error message in the joke element.
- * Uses the copy from DECISIONS.md D14 based on error type.
+ * Display an error message with a retry button.
+ * Uses copy from DECISIONS.md D14 based on error type.
+ * If a cached joke is provided, shows it as a fallback below the error.
+ *
+ * Built with DOM methods (not innerHTML) per D6 XSS decision.
  */
 export function renderError(
   message: string,
   type: 'network' | 'http' | 'timeout' | 'validation',
+  cachedJoke?: string,
 ): void {
   const jokeEl = document.getElementById('joke');
-  if (jokeEl) {
-    jokeEl.textContent = ERROR_MESSAGES[type] ?? message;
-    jokeEl.classList.add('joke--error');
-    jokeEl.classList.remove('joke--loading');
+  if (!jokeEl) return;
+
+  // Clear previous content
+  jokeEl.textContent = '';
+  jokeEl.classList.add('joke--error');
+  jokeEl.classList.remove('joke--loading');
+
+  // Error message text
+  const errorText = document.createElement('span');
+  errorText.className = 'error-message';
+  errorText.textContent = ERROR_MESSAGES[type] ?? message;
+  jokeEl.appendChild(errorText);
+
+  // Retry button
+  const retryBtn = document.createElement('button');
+  retryBtn.className = 'retry-btn';
+  retryBtn.textContent = 'Try again';
+  retryBtn.type = 'button';
+  retryBtn.addEventListener('click', () => {
+    if (retryHandler) retryHandler();
+  });
+  jokeEl.appendChild(retryBtn);
+
+  // Cached joke fallback
+  if (cachedJoke) {
+    const fallbackLabel = document.createElement('span');
+    fallbackLabel.className = 'fallback-label';
+    fallbackLabel.textContent = "In the meantime, here's your last joke:";
+    jokeEl.appendChild(fallbackLabel);
+
+    const fallbackJoke = document.createElement('span');
+    fallbackJoke.className = 'fallback-joke';
+    fallbackJoke.textContent = cachedJoke;
+    jokeEl.appendChild(fallbackJoke);
   }
 }
