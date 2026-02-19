@@ -44,36 +44,36 @@ describe('Baseline: API module', () => {
 describe('Baseline: UI module', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div class="container">
-        <h3>Don't Laugh Challenge</h3>
-        <div class="joke" id="joke">// Joke goes here</div>
-        <button id="jokeBtn" class="btn">Get Another Joke</button>
-      </div>
+      <main class="container" role="main">
+        <h1 class="title">Don't Laugh Challenge</h1>
+        <p class="joke" id="joke" aria-live="polite" aria-atomic="true">Loading...</p>
+        <button id="jokeBtn" class="btn" type="button">Get Another Joke</button>
+      </main>
     `;
   });
 
   it('renders joke text into the joke element', () => {
     renderJoke('Test joke text');
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe('Test joke text');
+    expect(jokeEl?.textContent).toBe('Test joke text');
   });
 
   it('replaces existing joke text with new text', () => {
     renderJoke('First joke');
     renderJoke('Second joke');
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe('Second joke');
+    expect(jokeEl?.textContent).toBe('Second joke');
   });
 });
 
 describe('Baseline: Integration', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div class="container">
-        <h3>Don't Laugh Challenge</h3>
-        <div class="joke" id="joke">// Joke goes here</div>
-        <button id="jokeBtn" class="btn">Get Another Joke</button>
-      </div>
+      <main class="container" role="main">
+        <h1 class="title">Don't Laugh Challenge</h1>
+        <p class="joke" id="joke" aria-live="polite" aria-atomic="true">Loading...</p>
+        <button id="jokeBtn" class="btn" type="button">Get Another Joke</button>
+      </main>
     `;
   });
 
@@ -82,7 +82,7 @@ describe('Baseline: Integration', () => {
     renderJoke(joke.joke);
 
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe(MOCK_JOKE.joke);
+    expect(jokeEl?.textContent).toBe(MOCK_JOKE.joke);
   });
 
   it('button click triggers a new joke fetch and display', async () => {
@@ -94,6 +94,6 @@ describe('Baseline: Integration', () => {
     renderJoke(joke.joke);
 
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe(MOCK_JOKE.joke);
+    expect(jokeEl?.textContent).toBe(MOCK_JOKE.joke);
   });
 });

@@ -1,67 +1,154 @@
 /*
  * Dad Jokes — Styles
  *
- * Direct port of the original tutorial CSS.
- * Google Fonts @import removed — Roboto is self-hosted via @fontsource.
- * All other styles are identical to the original.
+ * Accessibility fixes (#10):
+ * - Replaced outline:0 with visible focus styles
+ * - Fixed colour contrast to WCAG AA (4.5:1+)
+ * - Removed overflow:hidden on body
+ * - 44x44px minimum touch targets
+ * - prefers-reduced-motion support
+ * - CSS custom properties for all colours (theming prep)
+ *
+ * Responsive fixes (#11):
+ * - Fluid typography with clamp()
+ * - Mobile-first padding (24px mobile, 50px desktop)
+ * - Responsive container
+ *
+ * Self-hosted Roboto via @fontsource (imported in main.ts)
  */
 
+/* ===== Custom Properties ===== */
+:root {
+  --color-bg: #686de0;
+  --color-card: #ffffff;
+  --color-text: #1a1a2e;
+  --color-text-muted: #555555;
+  --color-btn: #7c3aed;
+  --color-btn-hover: #6d28d9;
+  --color-btn-text: #ffffff;
+  --color-focus: #2563eb;
+  --color-error: #dc2626;
+
+  --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+  --shadow-btn: 0 5px 15px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+
+  --radius-card: 10px;
+  --radius-btn: 10px;
+}
+
+/* ===== Reset ===== */
 * {
   box-sizing: border-box;
 }
 
+/* ===== Body ===== */
 body {
-  background-color: #686de0;
+  background-color: var(--color-bg);
   font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  color: var(--color-text);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  /* overflow: hidden REMOVED — prevents scrolling on long jokes */
   margin: 0;
-  padding: 20px;
+  padding: 24px;
 }
 
+/* ===== Container (card) ===== */
 .container {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
-  padding: 50px 20px;
+  background-color: var(--color-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 40px 24px;
   text-align: center;
   max-width: 100%;
   width: 800px;
 }
 
-h3 {
+/* ===== Title ===== */
+.title {
   margin: 0;
-  opacity: 0.5;
+  color: var(--color-text-muted);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-weight: 700;
   letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
+/* ===== Joke text ===== */
 .joke {
-  font-size: 30px;
-  letter-spacing: 1px;
-  line-height: 40px;
-  margin: 50px auto;
+  font-size: clamp(1.125rem, 4vw, 1.875rem);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  margin: 40px auto;
   max-width: 600px;
+  min-height: 2em;
 }
 
+.joke--error {
+  color: var(--color-error);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+}
+
+/* ===== Button ===== */
 .btn {
-  background-color: #9f68e0;
+  background-color: var(--color-btn);
   border: 0;
-  color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+  color: var(--color-btn-text);
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-btn);
   padding: 14px 40px;
-  font-size: 16px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+  /* 44x44px minimum touch target */
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.btn:hover {
+  background-color: var(--color-btn-hover);
 }
 
 .btn:active {
   transform: scale(0.98);
 }
 
-.btn:focus {
-  outline: 0;
+/* Visible focus styles — WCAG 2.4.7 */
+.btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active {
+    transform: none;
+  }
+
+  .btn {
+    transition: none;
+  }
+}
+
+/* ===== Desktop breakpoint ===== */
+@media (min-width: 640px) {
+  body {
+    padding: 50px;
+  }
+
+  .container {
+    padding: 50px 40px;
+  }
 }
