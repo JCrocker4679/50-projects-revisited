@@ -8,8 +8,12 @@ export const MOCK_JOKE = {
   status: 200,
 };
 
+/** Track the last request for header verification in tests */
+export let lastRequest: Request | null = null;
+
 export const handlers = [
-  http.get(API_URL, () => {
+  http.get(API_URL, ({ request }) => {
+    lastRequest = request;
     return HttpResponse.json(MOCK_JOKE);
   }),
 ];
