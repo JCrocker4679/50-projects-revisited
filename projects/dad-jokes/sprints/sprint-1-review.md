@@ -140,7 +140,10 @@ Ticket #15 created `vercel.json` *inside* `projects/dad-jokes/refactored/`, whic
 **5. The OG image is a placeholder SVG that won't work on most platforms.**
 Most social platforms (Facebook, Twitter/X, LinkedIn, Slack) require a PNG or JPEG for OG images — SVG is not supported. This was noted in the PR but should have been a ticket, not a note. It means the meta tags exist but the link preview won't have an image on most platforms.
 
-**6. The CHANGELOG.md got stale immediately.**
+**6. GitHub Projects board management is blocked by interactive auth.**
+The sprint-plan command includes a step to create and populate a GitHub Project board using `gh project` commands. These commands require `read:project` and `project` OAuth scopes that aren't in the default `gh` auth token. Every call triggered a device code flow (`gh auth refresh`) requiring the user to visit a URL and approve — an interactive step an autonomous agent can't complete unattended. The board was never created. This was non-blocking because issues + labels provided everything needed for sprint tracking, but the sprint-plan command currently includes four steps (list, create, add issues, note project number) that will silently block every future sprint until the command is fixed.
+
+**7. The CHANGELOG.md got stale immediately.**
 It was written to capture the scaffold/migration, then never updated as the sprint progressed. By the end of the sprint it's a partial record. This isn't critical but it means the changelog isn't useful as a "what changed in this sprint" document.
 
 ### 🤔 What Surprised Us
@@ -176,6 +179,9 @@ This should have been in ticket #3 (scaffold) or at worst ticket #15 (deploy). A
 
 **5. Add a "done = deployed and verified" gate.**
 The Definition of Done said "deployed to Vercel" but the sprint-review ran before the deployment was actually verified working. Going forward: sprint-review only runs after Joe has confirmed the live URL loads correctly in a browser. Add this as an explicit step in the sprint-review skill prompt.
+
+**6. Drop GitHub Projects board management — use issues + labels instead.**
+The `gh project` CLI commands require `read:project` and `project` OAuth scopes that aren't granted by default. Every attempt to use them triggered an interactive device code auth flow (`gh auth refresh`) that requires the user to open a URL and manually approve — fundamentally incompatible with autonomous agent execution. The sprint-plan command currently includes a "GitHub Project setup" section that will silently block every sprint. This section should be removed or replaced. Issues + labels + milestones provide everything we actually need: filtering by phase (`--label phase-2`), dependency tracking (`Blocked by: #N`), and status visibility. The sprint-plan and sprint-run slash commands need updating to remove the project board steps.
 
 **5. Fix the OG image properly in Sprint 2 setup.**
 Create a proper PNG or JPEG OG image (1200×630) before Sprint 2 ships. This could be as simple as a screenshot-to-PNG or a Satori-generated image. It's a small thing that makes the content series more professional.

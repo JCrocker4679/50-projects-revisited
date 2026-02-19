@@ -28,15 +28,15 @@ Before creating anything, check whether this sprint has already been planned:
 
 This means you can safely re-run `/sprint-plan` after decisions change without creating duplicates.
 
-## GitHub Project setup
+## GitHub tracking: issues + labels (not GitHub Projects)
 
-This repo covers multiple projects, so each project gets its own GitHub Project board.
+> **Note:** Do NOT use `gh project` commands. The GitHub Projects API requires `read:project` and `project` OAuth scopes that are not granted by default. Every attempt triggers an interactive device code auth flow incompatible with autonomous agent execution. GitHub Projects board management is a **prohibited step** in this workflow.
 
-1. Check if a GitHub Project already exists for this project name:
-   `gh project list --owner @me`
-2. If no project exists with a matching name (e.g. "Dad Jokes"), create one:
-   `gh project create --owner @me --title "{Project Name}"`
-3. Store the project number — you'll need it to add issues to the board
+Tracking is done entirely with **GitHub Issues + labels + milestones** — which provides everything needed:
+- Filter by phase: `gh issue list --label phase-{n}`
+- Dependency tracking: `Blocked by: #{N}` in issue body
+- Progress: open vs closed issues per phase label
+- No GitHub Projects board setup required
 
 ## Sprint plan
 
@@ -99,13 +99,7 @@ For tasks that belong to a specific user story, also include:
 **Story:** #{story-issue-number}
 ```
 
-**4. Add all issues to the GitHub Project:**
-After creating each issue, add it to the project board:
-```
-gh project item-add {project-number} --owner @me --url {issue-url}
-```
-
-**5. Reference dependencies explicitly:**
+**4. Reference dependencies explicitly:**
 If ticket B depends on ticket A, include in B's body:
 ```
 **Blocked by:** #{a-issue-number}
