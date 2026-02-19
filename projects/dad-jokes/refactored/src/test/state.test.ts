@@ -1,13 +1,14 @@
 /**
- * State management tests — Ticket #14
+ * State management tests
  *
  * Tests the application state module in state.ts:
  * - setCurrentJoke / getCurrentJoke
  * - setIsLoading / getIsLoading
  * - setError / getError
+ * - getFavourites / isFavourited / toggleFavourite
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   getCurrentJoke,
   setCurrentJoke,
@@ -15,14 +16,20 @@ import {
   setIsLoading,
   getError,
   setError,
+  getFavourites,
+  isFavourited,
+  toggleFavourite,
+  initFavourites,
 } from '../state.ts';
+
+vi.mock('../storage.ts', () => ({
+  loadFavourites: () => [],
+  saveFavourites: vi.fn(),
+}));
 
 describe('State: currentJoke', () => {
   it('starts as null', () => {
-    // Note: state persists across tests in the same module since it's module-level
-    // The initial test checks the default before any mutations
-    // For a clean test, we'd need a reset function — but Sprint 1 state is minimal
-    expect(getCurrentJoke()).toBeDefined(); // Will be null or a previously set joke
+    expect(getCurrentJoke()).toBeDefined();
   });
 
   it('setCurrentJoke updates the value returned by getCurrentJoke', () => {
@@ -62,5 +69,49 @@ describe('State: error', () => {
     setError('Some error');
     setError(null);
     expect(getError()).toBeNull();
+  });
+});
+
+describe('State: favourites', () => {
+  beforeEach(() => {
+    initFavourites();
+  });
+
+  it('starts empty after initFavourites', () => {
+    expect(getFavourites()).toHaveLength(0);
+  });
+
+  it('toggleFavourite adds a new joke', () => {
+    toggleFavourite({ id: 'a', joke: 'Joke A' });
+    expect(getFavourites()).toHaveLength(1);
+    expect(getFavourites()[0].id).toBe('a');
+  });
+
+  it('toggleFavourite removes an already-favourited joke', () => {
+    toggleFavourite({ id: 'a', joke: 'Joke A' });
+    toggleFavourite({ id: 'a', joke: 'Joke A' });
+    expect(getFavourites()).toHaveLength(0);
+  });
+
+  it('isFavourited returns true for a favourited joke', () => {
+    toggleFavourite({ id: 'b', joke: 'Joke B' });
+    expect(isFavourited('b')).toBe(true);
+  });
+
+  it('isFavourited returns false for an unfavourited joke', () => {
+    expect(isFavourited('not-there')).toBe(false);
+  });
+
+  it('adds new favourites at the front (newest first)', () => {
+    toggleFavourite({ id: 'first', joke: 'First' });
+    toggleFavourite({ id: 'second', joke: 'Second' });
+    expect(getFavourites()[0].id).toBe('second');
+  });
+
+  it('trims favourites to 100', () => {
+    for (let i = 0; i < 105; i++) {
+      toggleFavourite({ id: `j${i}`, joke: `Joke ${i}` });
+    }
+    expect(getFavourites()).toHaveLength(100);
   });
 });
