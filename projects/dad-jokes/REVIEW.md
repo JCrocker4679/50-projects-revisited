@@ -22,31 +22,31 @@ Fetches a random dad joke from the icanhazdadjoke API and displays it on screen.
 ### What's missing for production
 
 **Critical:**
-- [ ] **No error handling** — if the API is down or the network drops, the user sees nothing. No try/catch, no fallback, no retry
-- [ ] **No loading state** — clicking the button gives zero feedback while the fetch is in progress. On slow connections this would feel broken
-- [ ] **XSS risk** — uses `innerHTML` to render the joke. The API *probably* returns safe strings, but this is bad practice. Should use `textContent`
-- [ ] **No User-Agent header** — the API docs specifically ask consumers to set a custom User-Agent. The original code doesn't
+- [x] **No error handling** — ✅ Sprint 1: ApiError class, 4 error types, user-facing messages + retry button
+- [x] **No loading state** — ✅ Sprint 1: shimmer animation, aria-busy, button disabled during fetch
+- [x] **XSS risk** — ✅ Sprint 1: innerHTML → textContent throughout; DOM elements built programmatically
+- [x] **No User-Agent header** — ✅ Sprint 1: User-Agent header added to all API requests
 
 **Accessibility:**
-- [ ] **No ARIA live region** — screen readers won't announce when a new joke loads
-- [ ] **Focus management** — no visible focus styles (`.btn:focus { outline: 0 }` actively removes them)
-- [ ] **Joke container is a `<div>`** — should probably be a `<p>` or have an appropriate role
-- [ ] **No skip-to-content or landmark roles**
-- [ ] **Colour contrast** — the purple button on purple background may not meet WCAG AA
+- [x] **No ARIA live region** — ✅ Sprint 1: aria-live="polite" aria-atomic="true" on joke container
+- [x] **Focus management** — ✅ Sprint 1: focus-visible styles added; outline:0 removed
+- [x] **Joke container is a `<div>`** — ✅ Sprint 1: changed to `<p>` with semantic role
+- [x] **No skip-to-content or landmark roles** — ✅ Sprint 1: `<main>` landmark added
+- [x] **Colour contrast** — ✅ Sprint 1: WCAG AA contrast ratios verified
 
 **UX gaps:**
-- [ ] **No way to share a joke** — no copy button, no share link, no tweet button
-- [ ] **No joke history** — once you click "next" the previous joke is gone forever
-- [ ] **No search** — the API supports search by keyword, completely unused
-- [ ] **No favourites** — can't save jokes you like
-- [ ] **Placeholder text visible** — `// Joke goes here` flashes before the first fetch resolves
-- [ ] **Button doesn't disable during fetch** — user can spam-click and fire multiple concurrent requests
+- [ ] **No way to share a joke** — 📋 Sprint 2: Web Share API + clipboard fallback
+- [ ] **No joke history** — 📋 Sprint 2: localStorage array, back/forward nav
+- [ ] **No search** — 📋 Sprint 2: keyword search using API support
+- [ ] **No favourites** — 📋 Sprint 2: star/unstar with localStorage persistence
+- [x] **Placeholder text visible** — ✅ Sprint 1: "Warming up..." shown on first load; shimmer on subsequent loads
+- [x] **Button doesn't disable during fetch** — ✅ Sprint 1: button disabled during fetch, in-flight requests cancelled
 
 **Technical:**
-- [ ] **No tests**
-- [ ] **No build tooling** — fine for a tutorial, but limits what you can do
-- [ ] **No meta tags** — no description, no OG tags, no favicon
-- [ ] **Only loads Roboto 700** — the body text isn't bold, so the font weight doesn't match usage
+- [x] **No tests** — ✅ Sprint 1: 55 tests, 97% coverage, 500ms runtime
+- [x] **No build tooling** — ✅ Sprint 1: Vite + TypeScript, strict mode, 92ms build
+- [x] **No meta tags** — ✅ Sprint 1: meta description, OG tags, Twitter card, SVG favicon
+- [x] **Only loads Roboto 700** — ✅ Sprint 1: @fontsource self-hosted, latin subset, weights 400+700
 
 ### Who would actually use this?
 People who want a quick laugh — it's a novelty/humour app. The real audience is wider than you'd think: office workers killing time, parents looking for clean jokes, teachers who want an icebreaker. Dad joke apps consistently do well because the content is inoffensive and shareable.
@@ -54,53 +54,70 @@ People who want a quick laugh — it's a novelty/humour app. The real audience i
 ### v2 Spec — "Dad Jokes, but actually good"
 
 **MVP features:**
-1. Loading and error states that actually tell the user what's happening
-2. Joke history (last N jokes, navigate back/forward)
-3. Copy joke to clipboard
-4. Share joke (native Web Share API where supported, fallback to copy)
-5. Search jokes by keyword
-6. Favourites (localStorage)
-7. Proper accessibility (ARIA, focus, contrast)
-8. Responsive design that works properly on mobile
+1. ✅ Loading and error states that actually tell the user what's happening *(Sprint 1)*
+2. Joke history (last N jokes, navigate back/forward) *(Sprint 2)*
+3. Copy joke to clipboard *(Sprint 2)*
+4. Share joke (native Web Share API where supported, fallback to copy) *(Sprint 2)*
+5. Search jokes by keyword *(Sprint 2)*
+6. Favourites (localStorage) *(Sprint 2)*
+7. ✅ Proper accessibility (ARIA, focus, contrast) *(Sprint 1)*
+8. ✅ Responsive design that works properly on mobile *(Sprint 1)*
 
 **Stretch goals:**
-- Joke categories or tags (if the API supports it, or add our own layer)
-- Daily joke notification (PWA + service worker)
-- "Joke of the day" permalink
-- Social card / OG image generation for shared jokes
-- Dark mode
-- Joke rating system (thumbs up/down with local storage)
-- Animated transitions between jokes
+- ~~Joke categories or tags~~ — API doesn't support this; would need backend. Dropped.
+- Daily joke notification (PWA + service worker) *(Sprint 3)*
+- "Joke of the day" permalink *(Sprint 3)*
+- Social card / OG image generation for shared jokes *(Sprint 2: static PNG; Sprint 3: generated)*
+- Dark mode *(Sprint 3 — CSS custom properties already in place)*
+- Joke rating system (thumbs up/down with local storage) *(Sprint 3)*
+- Animated transitions between jokes *(Sprint 3)*
 
 ---
 
 ## Refactor plan
 
-### Phase 1 — Fix the foundations
-1. Add try/catch with user-facing error messages
-2. Add loading state (disable button, show spinner or text)
-3. Replace `innerHTML` with `textContent`
-4. Set custom User-Agent header per API docs
-5. Remove `outline: 0`, add proper focus styles
-6. Add ARIA live region for joke updates
-7. Fix the placeholder text (hide until first joke loads)
-8. Add meta tags, favicon, proper `<title>`
+### Phase 1 — Fix the foundations ✅ COMPLETE (Sprint 1, 2026-02-19)
+All 14 tickets shipped. See `sprints/sprint-1-review.md` for full retro.
 
-### Phase 2 — Make it useful
-9. Joke history (store in array, add back/forward nav)
-10. Copy to clipboard button
-11. Web Share API integration
-12. Search by keyword
-13. Favourites with localStorage
-14. Responsive design polish for mobile
+1. ✅ Add try/catch with user-facing error messages
+2. ✅ Add loading state (disable button, shimmer animation)
+3. ✅ Replace `innerHTML` with `textContent` (+ DOM-built elements for error state)
+4. ✅ Set custom User-Agent header per API docs
+5. ✅ Remove `outline: 0`, add proper focus-visible styles
+6. ✅ Add ARIA live region for joke updates
+7. ✅ Fix the placeholder text ("Warming up..." on first load)
+8. ✅ Add meta tags, favicon, proper `<title>`
+9. ✅ Bonus: Vite + TypeScript build tooling (moved up from Phase 3)
+10. ✅ Bonus: 55 tests with 97% coverage (moved up from Phase 3)
+11. ✅ Bonus: Content Security Policy
+12. ✅ Bonus: Vercel deployment config with security headers
 
-### Phase 3 — Make it impressive
-15. Add build tooling (Vite or similar)
-16. Add tests (Vitest or similar)
-17. Animated joke transitions (CSS or Framer Motion)
-18. PWA support
-19. OG image generation for shared jokes
-20. Deploy somewhere (Vercel, Netlify)
+### Phase 2 — Make it useful 📋 NEXT (Sprint 2)
+Revised based on Sprint 1 learnings. Priority order:
+
+1. OG image (PNG 1200×630) — small thing, high polish impact *(carry-over from Sprint 1)*
+2. Joke history — localStorage array, back/forward navigation
+3. Copy to clipboard — Clipboard API
+4. Favourites — star/unstar with localStorage persistence
+5. Favourites list view
+6. Web Share API with clipboard fallback
+7. Search by keyword — uses API's search endpoint
+8. Analytics events — Vercel Analytics (joke_fetched, error, retry, favourite_added)
+9. Visual refresh — new colour palette (keep structure, update feel)
+10. E2E test: happy path with Playwright
+
+**Dropped from original Phase 2:** "Responsive design polish" — already done in Sprint 1.
+
+### Phase 3 — Make it impressive 🔮 FUTURE
+*Sequencing revised — build tooling, tests, and deploy moved to Sprint 1 where they belonged.*
+
+1. Animated joke transitions (CSS, prefers-reduced-motion aware)
+2. PWA support (service worker, offline, install prompt)
+3. Dark mode (CSS custom properties already wired)
+4. Joke rating system (thumbs up/down, localStorage)
+5. "Joke of the day" permalink
+6. Generated OG images per joke (Satori or similar)
+7. Performance budget (Lighthouse, Core Web Vitals targets)
 
 ---
 
@@ -108,6 +125,19 @@ People who want a quick laugh — it's a novelty/humour app. The real audience i
 | Model | Task | How it went |
 |-------|------|-------------|
 | Claude Opus 4.6 | Initial PM review & refactor plan | Via Cowork mode |
+| Claude Opus 4.6 | 8 expert agent reviews + decisions | Full team-review + product-decisions workflow |
+| Claude Opus 4.6 | Sprint 1 planning (15 issues) | /sprint-plan — accurate, well-sequenced |
+| Claude Opus 4.6 | Sprint 1 execution (13 PRs) | /sprint-run — autonomous, 14/14 tickets completed |
 
 ## Learnings
-_To be filled in as we go._
+
+**Sprint 1 (2026-02-19):**
+- The expert-agent → decisions → sprint-plan → sprint-run pipeline works. Zero supervision needed on the actual coding.
+- Stacked PRs (each ticket off its dependency branch) work but require careful merge order. Merge the chain between sprints.
+- `happy-dom` is the right Vitest environment for Node 22+ (jsdom has ESM compat issues).
+- Spike first, always. 30-minute spike saved hours of potential rework on fonts + User-Agent.
+- Build tooling and tests belong in Phase 1 (foundations), not Phase 3 (impressive). The original plan had this sequencing wrong.
+- `erasableSyntaxOnly: true` in TypeScript 5.9+ rejects parameter properties in classes — worth knowing for all future projects.
+- CSS custom properties + clamp() + focus-visible + prefers-reduced-motion should be defaults in all projects going forward.
+- The AI naturally wrote for Sprint 2 (CSS custom properties as theming groundwork) without being told to. This is the right instinct.
+- Context loss between sessions is the primary operational risk for long sprint-runs. Mitigate with branch checkpointing.
