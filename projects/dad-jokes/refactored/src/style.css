@@ -65,3 +65,52 @@ h3 {
 .btn:focus {
   outline: 0;
 }
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading state — shimmer overlay */
+.joke--loading {
+  position: relative;
+  color: #999;
+}
+
+.joke--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .joke--loading::after {
+    animation: none;
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Error state */
+.joke--error {
+  color: #c0392b;
+}

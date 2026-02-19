@@ -14,14 +14,56 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 /**
+ * Show loading state.
+ * Disables button and adds aria-busy for screen readers.
+ */
+export function showLoading(isFirstLoad: boolean): void {
+  const jokeEl = document.getElementById('joke');
+  const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+
+  if (jokeEl) {
+    jokeEl.setAttribute('aria-busy', 'true');
+    jokeEl.classList.add('joke--loading');
+    jokeEl.classList.remove('joke--error');
+    if (isFirstLoad) {
+      jokeEl.textContent = 'Warming up...';
+    }
+    // On subsequent loads, keep showing the previous joke (shimmer overlay)
+  }
+
+  if (jokeBtn) {
+    jokeBtn.disabled = true;
+  }
+}
+
+/**
+ * Hide loading state.
+ * Re-enables button and removes aria-busy.
+ */
+export function hideLoading(): void {
+  const jokeEl = document.getElementById('joke');
+  const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+
+  if (jokeEl) {
+    jokeEl.setAttribute('aria-busy', 'false');
+    jokeEl.classList.remove('joke--loading');
+  }
+
+  if (jokeBtn) {
+    jokeBtn.disabled = false;
+  }
+}
+
+/**
  * Display a joke in the joke element.
- * Clears any error state.
+ * Clears any error/loading state.
  */
 export function renderJoke(jokeText: string): void {
   const jokeEl = document.getElementById('joke');
   if (jokeEl) {
     jokeEl.textContent = jokeText;
     jokeEl.classList.remove('joke--error');
+    jokeEl.classList.remove('joke--loading');
   }
 }
 
@@ -37,5 +79,6 @@ export function renderError(
   if (jokeEl) {
     jokeEl.textContent = ERROR_MESSAGES[type] ?? message;
     jokeEl.classList.add('joke--error');
+    jokeEl.classList.remove('joke--loading');
   }
 }
