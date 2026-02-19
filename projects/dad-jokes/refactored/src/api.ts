@@ -6,13 +6,18 @@ import type { Joke, ApiResponse } from './types.ts';
  * Distinguishes between network errors, HTTP errors, and validation errors.
  */
 export class ApiError extends Error {
+  readonly type: 'network' | 'http' | 'timeout' | 'validation';
+  readonly status?: number;
+
   constructor(
     message: string,
-    public readonly type: 'network' | 'http' | 'timeout' | 'validation',
-    public readonly status?: number,
+    type: 'network' | 'http' | 'timeout' | 'validation',
+    status?: number,
   ) {
     super(message);
     this.name = 'ApiError';
+    this.type = type;
+    this.status = status;
   }
 }
 

@@ -11,7 +11,7 @@
  * - Correct headers (Accept, User-Agent)
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from './mocks/server.ts';
 import { fetchJoke, cancelActiveRequest, ApiError } from '../api.ts';
