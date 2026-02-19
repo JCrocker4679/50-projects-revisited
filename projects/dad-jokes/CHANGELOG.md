@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added
+- Visual refresh: warm amber/cream colour palette replacing tutorial purple; action row layout for secondary buttons; icon button variant (`btn--icon`) with hover/active states
+
+### Changed
+- Main button label: "Get Another Joke" → "Tell me another"
+- Joke text fade on load (CSS opacity transition, respects `prefers-reduced-motion`)
+- Error colours now use CSS custom properties (no more hardcoded hex in error styles)
+
+---
+
+## [Sprint 1]
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)
