@@ -2,7 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added
+- Vercel Analytics: page-view tracking via `inject()` on load; custom events for `joke_fetched`, `error_shown`, `retry_clicked`, `joke_copied`, `joke_shared`, `favourite_added`, `favourite_removed`, `history_navigated`
+- `src/analytics.ts` — typed analytics wrapper with `safeTrack()` so analytics failures never reach the user
+- OG image: real 1200×630 PNG replacing placeholder, for proper social sharing previews
+
+### Changed
+- Content Security Policy updated to allow `https://va.vercel-insights.com` for analytics
+
+---
+
+## [Sprint 1]
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)
