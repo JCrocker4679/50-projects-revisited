@@ -152,3 +152,97 @@ body {
     padding: 50px 40px;
   }
 }
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading state — shimmer overlay */
+.joke--loading {
+  position: relative;
+  color: #999;
+}
+
+.joke--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .joke--loading::after {
+    animation: none;
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* Error state */
+.joke--error {
+  color: #c0392b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-message {
+  display: block;
+}
+
+.retry-btn {
+  background-color: #c0392b;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.retry-btn:hover {
+  background-color: #a93226;
+}
+
+.retry-btn:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.fallback-label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.fallback-joke {
+  display: block;
+  font-size: 22px;
+  color: #333;
+  font-style: italic;
+}
