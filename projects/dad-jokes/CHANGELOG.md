@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added
+- Copy joke to clipboard button; shows "✓ Copied!" feedback for 2s, resets automatically; falls back to `execCommand` on older browsers
+
+---
+
+## [Sprint 1]
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)

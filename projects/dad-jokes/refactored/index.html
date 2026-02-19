@@ -37,9 +37,18 @@
         aria-live="polite"
         aria-atomic="true"
       >Loading...</p>
-      <button id="jokeBtn" class="btn" type="button">
-        Get Another Joke
-      </button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn" type="button">
+          Get Another Joke
+        </button>
+        <button
+          id="copyBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-label="Copy joke to clipboard"
+          disabled
+        >📋</button>
+      </div>
     </main>
 
     <noscript>
