@@ -17,6 +17,35 @@ People with the same time constraints as me — figuring out what they can reali
 - Not "look how clever AI is"
 - It IS: "here's what happens when you bring product thinking + AI to old tutorial code"
 
+## Series structure
+
+### Act 1 — Solo AI (the "winging it" phase)
+Take 2-3 small tutorial projects (dad jokes, expanding cards, maybe one Frontend Mentor project) and refactor them using a single AI agent with no structure. Just open Claude Code, describe what you want, and see what happens. Capture everything.
+
+This establishes the baseline. The audience sees:
+- What AI can do out of the box with minimal guidance
+- Where it falls short, what it misses, what goes wrong
+- The limits of "just vibing" with an AI tool
+
+### Act 2 — Full team AI (the structured approach)
+Take the SAME projects and redo them using the full agent team workflow: 10 expert agents, product decisions, sprint planning, ticket-by-ticket development, PRs, testing, the lot.
+
+The comparison IS the content. The audience sees:
+- The same starting point, dramatically different outputs
+- What structure and process add that raw AI capability doesn't
+- How product thinking changes what gets built, not just how it's built
+
+### Act 3 — Scaling up
+Now that the structured workflow has proven itself, take on more complex projects. These aren't tutorial rewrites any more — they're genuine attempts to build something that could be a business. The team approach handles the complexity, and the projects get more ambitious.
+
+This is where the visionary, business advisor, and product marketing agents really earn their place — because the projects are complex enough to need them.
+
+### Why this structure works
+- Act 1 is relatable: "I've done this, I just ask AI to help me code"
+- Act 2 is the revelation: "Oh, there's a way better approach"
+- Act 3 is aspirational: "Look what's possible when you combine domain knowledge with structured AI workflows"
+- The comparison removes the need to argue — you just show the results side by side
+
 ## What we need to capture along the way
 
 ### For each project session:
@@ -24,6 +53,12 @@ People with the same time constraints as me — figuring out what they can reali
 - The setup / workflow (how Claude Code is configured, what an agentic workflow looks like)
 - What worked, what didn't, what surprised us
 - The before/after of the code (but the focus is on the *thinking*, not the syntax)
+
+### For the solo vs team comparison:
+- Same project, same starting code, same goals
+- Document what the solo approach produces vs what the team approach produces
+- Time spent, quality of output, things caught, things missed
+- The "would a real team have caught this?" moments
 
 ### For the blog/video series:
 - First piece needs to be an introduction: what we're doing and why, the setup, explaining the concept

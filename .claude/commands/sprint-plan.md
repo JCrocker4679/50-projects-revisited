@@ -2,14 +2,43 @@ You are a Product Manager / Scrum Master planning a sprint.
 
 Given "$ARGUMENTS" (format: "project-name phase-number", e.g. "dad-jokes 1"), do the following:
 
+## Inputs
+
 1. Read the project's `DECISIONS.md` — this is your primary input. The Sprint Brief at the bottom tells you exactly what's in scope, out of scope, and what constraints apply. **If DECISIONS.md doesn't exist, STOP and tell the user to run `/product-decisions` first.** Don't plan a sprint without decisions.
 2. Read the project's `REVIEW.md` for additional context on the refactor plan
 3. Read any relevant vision docs in `notes/`
-4. Check existing GitHub issues and project board state with `gh issue list` and `gh project list`
 
 **Important:** Only plan work that is IN SCOPE per the Sprint Brief in DECISIONS.md. Do not add items that were explicitly marked as out of scope — those decisions were already made.
 
-Then create a sprint plan:
+## Check for existing sprint
+
+Before creating anything, check whether this sprint has already been planned:
+
+1. Check if `projects/{project-name}/sprints/phase-{n}-plan.md` already exists
+2. Check for existing GitHub issues: `gh issue list --label phase-{n} --state all`
+
+**If a sprint plan already exists, this is a RE-PLAN.** Handle it as follows:
+- Read the existing plan file and the existing GitHub issues
+- Compare what exists against the current DECISIONS.md Sprint Brief (which may have changed since the original plan)
+- For issues that still match the updated scope: **leave them as-is** (don't recreate)
+- For issues that are no longer in scope: **close them** with a comment explaining they were descoped (`gh issue close {number} --comment "Descoped during sprint re-plan"`)
+- For new work that wasn't in the original plan: **create new issues** with proper epic/story relationships
+- For issues where the scope or acceptance criteria changed: **update the issue body** with `gh issue edit {number} --body "..."`
+- Update the sprint plan file with the revised breakdown
+
+This means you can safely re-run `/sprint-plan` after decisions change without creating duplicates.
+
+## GitHub Project setup
+
+This repo covers multiple projects, so each project gets its own GitHub Project board.
+
+1. Check if a GitHub Project already exists for this project name:
+   `gh project list --owner @me`
+2. If no project exists with a matching name (e.g. "Dad Jokes"), create one:
+   `gh project create --owner @me --title "{Project Name}"`
+3. Store the project number — you'll need it to add issues to the board
+
+## Sprint plan
 
 **Sprint goal:** One clear sentence describing what "done" looks like for this phase.
 
@@ -36,12 +65,59 @@ Then create a sprint plan:
 - Estimated complexity (S/M/L)
 - Dependencies (which tickets need to be done first)
 
-**Create everything in GitHub:**
-- Use `gh issue create` to create each ticket
-- Use labels to organise (create labels if they don't exist)
-- Set up dependencies by referencing blocking issues in the description
-- Add all issues to the GitHub project board if one exists
+## Creating issues in GitHub
 
-**Write a sprint summary** to `projects/{project-name}/sprints/phase-{n}-plan.md` with the full breakdown, ticket numbers, and suggested order of work.
+Create the epic first, then stories and tasks. Maintain explicit parent-child relationships throughout.
+
+**1. Create labels if they don't exist:**
+```
+gh label create epic --description "Epic / phase goal" --color 6A0DAD
+gh label create user-story --description "User story" --color 0075CA
+gh label create spike --color FBCA04
+gh label create refactor --color 0E8A16
+gh label create feature --color 1D76DB
+gh label create bug --color D73A4A
+gh label create test --color BFD4F2
+gh label create docs --color 0075CA
+gh label create phase-1 --color C5DEF5
+```
+(Adjust phase label number as needed. Skip any that already exist.)
+
+**2. Create the epic issue first:**
+```
+gh issue create --title "Epic: {phase goal}" --label epic,phase-{n} --body "..."
+```
+Note the epic's issue number (e.g. #1).
+
+**3. Create each user story and task with explicit parent relationship:**
+Every story and task body MUST include a line at the top linking it to the epic:
+```
+**Epic:** #{epic-issue-number}
+```
+For tasks that belong to a specific user story, also include:
+```
+**Story:** #{story-issue-number}
+```
+
+**4. Add all issues to the GitHub Project:**
+After creating each issue, add it to the project board:
+```
+gh project item-add {project-number} --owner @me --url {issue-url}
+```
+
+**5. Reference dependencies explicitly:**
+If ticket B depends on ticket A, include in B's body:
+```
+**Blocked by:** #{a-issue-number}
+```
+
+## Sprint summary
+
+Write the full sprint plan to `projects/{project-name}/sprints/phase-{n}-plan.md` with:
+- Sprint goal
+- Epic number and link
+- All tickets with numbers, titles, labels, assigned agent, complexity, dependencies
+- Suggested execution order (respecting dependencies)
+- Anything explicitly pushed to a future sprint and why
 
 Prioritise ruthlessly. Not everything from the phase plan needs to happen — focus on what delivers the most value. Flag anything you'd push to the next sprint.

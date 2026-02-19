@@ -13,7 +13,9 @@ For EACH role, fully inhabit that perspective — think like they would, priorit
 5. **QA Engineer** → `qa.md` — Testing strategy, edge cases, bug report, test plan, cross-browser
 6. **Copywriter** → `copywriter.md` — UI copy, brand voice, error messages, landing page, SEO, email, microcopy
 7. **Security Specialist** → `security.md` — Vulnerabilities, threat model, data privacy, compliance, secure practices
-8. **Business Advisor** → `business.md` — Market, revenue, costs, growth, risks, legal, metrics, honest commercial assessment
+8. **CFO / Business Stakeholder** → `business.md` — Revenue model, costs, profitability, unit economics, P&L. Treats the app as a commercial venture — how do we pay for everything?
+9. **Product Visionary** → `visionary.md` — The big picture. 10x version, ambitious features, what this COULD become. Pushes back on safe/boring sprint plans. Wants user accounts, leaderboards, UGC, social features, platform plays
+10. **Product Marketing Manager** → `product-marketing.md` — User acquisition, positioning, launch strategy, feature marketing, growth loops, retention
 
 After all reviews are written, create a `projects/{project-name}/reviews/SUMMARY.md` that:
 - Lists the top 3 priorities from each expert

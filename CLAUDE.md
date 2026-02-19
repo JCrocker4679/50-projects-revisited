@@ -23,7 +23,9 @@ We simulate a full product team using expert agent commands. Each agent reviews 
 | `/agent-qa` | QA Engineer | Testing strategy, edge cases, bug report, test plan |
 | `/agent-copywriter` | Copywriter | UI copy, brand voice, error messages, landing page, SEO, email |
 | `/agent-security` | Security Specialist | Vulnerabilities, threat model, data privacy, compliance |
-| `/agent-business` | Business Advisor | Market, revenue, costs, growth, risks, legal, metrics |
+| `/agent-business` | CFO / Business Stakeholder | Revenue model, costs, profitability, unit economics, P&L, commercial pressure |
+| `/agent-visionary` | Product Visionary | Big-picture thinking, ambitious features, 10x vision, what this COULD become |
+| `/agent-product-marketing` | Product Marketing Manager | User acquisition, positioning, launch strategy, feature marketing, growth |
 | `/team-review` | All of the above | Runs every expert, then produces a summary with consensus, tensions, and priorities |
 
 ### Product decisions (slash commands)
@@ -41,14 +43,22 @@ We use GitHub Issues, branches, and PRs to manage work — just like a real team
 | Command | Purpose |
 |---------|---------|
 | `/sprint-plan` | Break a phase into a sprint — reads DECISIONS.md Sprint Brief, creates epic, user stories, and tasks as GitHub issues |
-| `/work-ticket` | Pick up a ticket — creates branch, does the work, commits, opens a PR referencing the issue |
+| `/sprint-run` | Execute an entire sprint — works through every ticket in dependency order, one branch + PR per ticket. You come back to a stack of PRs to review |
+| `/work-ticket` | Pick up a single ticket manually — creates branch, does the work, commits, opens a PR. Use this if you want to cherry-pick one ticket rather than run the whole sprint |
 | `/sprint-review` | End-of-sprint review and retro — what shipped, what didn't, what we learned, reprioritise for next sprint |
 
-### Content creation (slash commands)
-Commands for turning project work into blog posts and videos.
+### Project lifecycle (slash commands)
 
 | Command | Purpose |
 |---------|---------|
+| `/project-retrospective` | End-of-project review — outcomes, agent performance, process review, recommendations for future projects |
+
+### Content creation (slash commands)
+Commands for turning project work into blog posts and videos. Note: `/content-extract` sits OUTSIDE the simulated team — it looks at the project with fresh eyes to find teachable moments.
+
+| Command | Purpose |
+|---------|---------|
+| `/content-extract` | Extract learning value from a project — web dev lessons, AI workflow lessons, PM lessons, "aha" moments |
 | `/content-plan` | Turn a project's work into a content plan — narrative arc, episode structure, talking points, audience value |
 | `/content-review` | Editorial review of a draft — brand voice, consistency, value check, honesty check |
 | `/content-next` | Figure out what to create next — series status, gaps, what's ready, 3 specific suggestions |
@@ -60,11 +70,13 @@ Commands for turning project work into blog posts and videos.
 3. **Decisions** — Synthesise reviews into concrete decisions and a Sprint Brief (`/product-decisions`). This is where scope gets set and disagreements get resolved
 4. **Baseline tests** — Write tests that lock down the current behaviour BEFORE changing anything (`/write-baseline-tests`). Prerequisite for all refactoring
 5. **Sprint plan** — Break the Sprint Brief into tickets on GitHub (`/sprint-plan`). Only plans work that's in scope per DECISIONS.md
-6. **Build** — Work tickets one by one, branch per ticket, PR per ticket (`/work-ticket`). Tests must pass before any PR is opened
+6. **Build** — Run the sprint (`/sprint-run`) to work through all tickets automatically — branch per ticket, PR per ticket. Or use `/work-ticket` to cherry-pick individual tickets. Tests must pass before any PR is opened
 7. **Sprint review** — Review what shipped, retro, reprioritise (`/sprint-review`). Feed learnings back into decisions for next sprint
 8. **Log** — Capture the session for content (`/session-log`)
 9. **Content** — Plan and produce blog/video content (`/content-plan`, `/content-review`)
 10. **Next** — Figure out what's next (`/content-next`, then back to step 3 for next sprint — decisions may change based on what we learned)
+11. **Project retrospective** — When the project is done, run `/project-retrospective` for a full review of outcomes, agent performance, and process improvements
+12. **Extract learnings** — Run `/content-extract` to identify teachable moments for the blog/video series
 
 ### Code standards
 - Accessibility is not optional — WCAG AA minimum
@@ -86,12 +98,21 @@ After each significant piece of work, update:
 - The project's `REVIEW.md` — check off completed items, add to the AI models table, note learnings
 - `notes/` — any observations about the AI workflow, surprising outputs, prompt strategies
 
+## Series structure
+The series runs in three acts (see `notes/blog-vision.md` for full detail):
+1. **Act 1 — Solo AI:** Refactor 2-3 small projects using a single AI agent with no structure. Establishes the baseline.
+2. **Act 2 — Full team AI:** Redo the SAME projects using the full agent team workflow. The comparison is the content.
+3. **Act 3 — Scaling up:** Take on more complex projects using the team approach, pushing toward real business viability.
+
+For Act 1/2 comparison projects, both attempts live under the same project folder in `solo/` and `team/` subdirectories.
+
 ## Project structure
 ```
 projects/
   {project-name}/
     original/         — Original tutorial code, untouched
-    refactored/       — The improved version
+    solo/             — Act 1: the unstructured single-agent attempt
+    refactored/       — Act 2+: the structured team attempt (aliased as "team" output)
     reviews/          — Expert agent assessments
     sprints/          — Sprint plans and reviews
     assets/           — Screenshots, recordings, design files
