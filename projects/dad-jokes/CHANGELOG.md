@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added
+- Joke history: stores last 50 jokes in localStorage (`dad-jokes-history-v1`); `navigateHistory()` for back/forward traversal
+
+---
+
+## [Sprint 1]
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)
