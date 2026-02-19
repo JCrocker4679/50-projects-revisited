@@ -1,18 +1,18 @@
 /**
  * UI rendering functions.
  *
- * Direct port of the original tutorial's DOM update logic.
- * Uses innerHTML to match original behaviour — will be replaced
- * with textContent in ticket #6.
+ * Security fix (#6): innerHTML replaced with textContent to prevent XSS.
+ * The icanhazdadjoke API returns plain text jokes, so textContent is
+ * both safer and more appropriate.
  */
 
 /**
  * Display a joke in the joke element.
- * Uses innerHTML to match original tutorial behaviour.
+ * Uses textContent (not innerHTML) to prevent XSS injection.
  */
 export function renderJoke(jokeText: string): void {
   const jokeEl = document.getElementById('joke');
   if (jokeEl) {
-    jokeEl.innerHTML = jokeText;
+    jokeEl.textContent = jokeText;
   }
 }

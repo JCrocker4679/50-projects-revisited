@@ -55,14 +55,14 @@ describe('Baseline: UI module', () => {
   it('renders joke text into the joke element', () => {
     renderJoke('Test joke text');
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe('Test joke text');
+    expect(jokeEl?.textContent).toBe('Test joke text');
   });
 
   it('replaces existing joke text with new text', () => {
     renderJoke('First joke');
     renderJoke('Second joke');
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe('Second joke');
+    expect(jokeEl?.textContent).toBe('Second joke');
   });
 });
 
@@ -82,7 +82,7 @@ describe('Baseline: Integration', () => {
     renderJoke(joke.joke);
 
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe(MOCK_JOKE.joke);
+    expect(jokeEl?.textContent).toBe(MOCK_JOKE.joke);
   });
 
   it('button click triggers a new joke fetch and display', async () => {
@@ -94,6 +94,6 @@ describe('Baseline: Integration', () => {
     renderJoke(joke.joke);
 
     const jokeEl = document.getElementById('joke');
-    expect(jokeEl?.innerHTML).toBe(MOCK_JOKE.joke);
+    expect(jokeEl?.textContent).toBe(MOCK_JOKE.joke);
   });
 });
