@@ -27,9 +27,13 @@ Work through every ticket in the sprint, one at a time. For each one:
 - Note which expert agent role is tagged — adopt that perspective
 
 **2. Branch**
-- `git checkout main` (or whatever the base branch is)
-- `git pull` to pick up work from previous tickets
+- `git checkout main`
+- `git pull` to pick up any merged work
 - `git checkout -b {issue-number}-{short-description}`
+
+> **Important:** All feature branches must target `main`, not each other. The PR created in step 6 must also target `main`. Stacked/chained PRs that target intermediate branches look merged on GitHub but never land on `main` until the whole chain is resolved — which breaks deployment and makes `git log origin/main` misleading. One ticket → one branch off `main` → one PR to `main`.
+>
+> **Context checkpoint:** Before starting any ticket (especially after a break or session restart), run `git branch --show-current` and `git log --oneline -3` to confirm you're on the right branch and the base is what you expect.
 
 **3. Pre-flight**
 - Run the existing test suite to confirm everything passes before touching anything
@@ -47,8 +51,8 @@ Work through every ticket in the sprint, one at a time. For each one:
 - Add new tests for any new functionality this ticket introduces
 
 **6. PR**
-- Update `CHANGELOG.md`
-- Create a PR with `gh pr create` that:
+- Update `CHANGELOG.md` — add a line for every user-visible behaviour change this ticket introduces. Not just at scaffold time: every PR that touches behaviour should have a CHANGELOG entry. This is part of the ticket, not optional.
+- Create a PR with `gh pr create --base main` that:
   - References the issue ("Closes #{issue-number}")
   - Describes what was done and why
   - Notes decisions made or trade-offs
@@ -67,9 +71,11 @@ Write a sprint execution summary to `projects/{project-name}/sprints/phase-{n}-e
 - Any blockers hit and how they were resolved
 - Any scope discoveries (things found during implementation that weren't in the plan)
 - Any tests that were updated and why
-- Suggested review order for the PRs (usually: merge in the order they were built)
+- **Merge order** — the exact sequence PRs must be merged in (always dependency order). Make this prominent. If PRs are merged out of order or skipped, `main` will be in a broken intermediate state.
 
-Then give the user a clear summary:
+Then give the user a clear handover summary:
 - "Sprint {n} complete — {X} PRs ready for review"
 - List each PR with a one-line description
+- The merge order as a numbered list — e.g. "Merge in this order: #16 → #17 → #18 ..."
+- A reminder: **merge all PRs before triggering any deployment** — `main` is the deployment source, and until all PRs land, `main` is incomplete
 - Flag anything that needs attention or a decision before merging

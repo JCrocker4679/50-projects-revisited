@@ -65,6 +65,10 @@ Tracking is done entirely with **GitHub Issues + labels + milestones** — which
 - Estimated complexity (S/M/L)
 - Dependencies (which tickets need to be done first)
 
+**Watch for ghost tickets:** If a ticket's work will obviously be absorbed into another (e.g. a migration ticket whose scope is fully covered by the scaffold ticket), flag it explicitly in the plan rather than creating a separate issue that will produce an empty PR. Either merge the tickets or note upfront: "This will be done as part of #{other-ticket}, no separate PR needed."
+
+**Monorepo Vercel config:** If the project lives in a subdirectory of a monorepo and will be deployed to Vercel, the scaffold ticket must include creating a **root-level `vercel.json`** with `rootDirectory`, `framework`, `buildCommand`, and `outputDirectory`. Do not leave this for the deploy ticket — by then the deployment pipeline may already be misconfigured and the bootstrapping problem won't be caught until the live deploy fails.
+
 ## Creating issues in GitHub
 
 Create the epic first, then stories and tasks. Maintain explicit parent-child relationships throughout.

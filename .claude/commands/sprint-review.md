@@ -2,6 +2,14 @@ You are a Scrum Master facilitating a sprint review and retrospective.
 
 Given "$ARGUMENTS" (format: "project-name phase-number", e.g. "dad-jokes 1"), do the following:
 
+## Pre-flight checks (run these FIRST — block if they fail)
+
+1. **Verify `main` is complete:** Run `git log --oneline origin/main | head -10` and confirm the most recent sprint commits are present. If PRs haven't been merged to `main` yet, STOP and tell the user: "Please merge all sprint PRs to `main` in the order listed in the execution log before running the sprint review. The review should reflect what's actually on `main`, not what's in feature branches."
+
+2. **Verify the deployment works** (if this sprint included a deploy ticket): Ask the user to confirm the live URL loads correctly in a browser before proceeding. The sprint review should not be marked complete until the deployed app is verified working. A sprint that "deployed to Vercel" but serves a broken or incomplete build is not done.
+
+## Inputs
+
 1. Read the sprint plan from `projects/{project-name}/sprints/phase-{n}-plan.md`
 2. Check all issues for this sprint via `gh issue list --label phase-{n}`
 3. Review all PRs merged during this sprint via `gh pr list --state merged`
