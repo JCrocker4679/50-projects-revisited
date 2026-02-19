@@ -44,11 +44,11 @@ describe('Baseline: API module', () => {
 describe('Baseline: UI module', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div class="container">
-        <h3>Don't Laugh Challenge</h3>
-        <div class="joke" id="joke">// Joke goes here</div>
-        <button id="jokeBtn" class="btn">Get Another Joke</button>
-      </div>
+      <main class="container" role="main">
+        <h1 class="title">Don't Laugh Challenge</h1>
+        <p class="joke" id="joke" aria-live="polite" aria-atomic="true">Loading...</p>
+        <button id="jokeBtn" class="btn" type="button">Get Another Joke</button>
+      </main>
     `;
   });
 
@@ -69,11 +69,11 @@ describe('Baseline: UI module', () => {
 describe('Baseline: Integration', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div class="container">
-        <h3>Don't Laugh Challenge</h3>
-        <div class="joke" id="joke">// Joke goes here</div>
-        <button id="jokeBtn" class="btn">Get Another Joke</button>
-      </div>
+      <main class="container" role="main">
+        <h1 class="title">Don't Laugh Challenge</h1>
+        <p class="joke" id="joke" aria-live="polite" aria-atomic="true">Loading...</p>
+        <button id="jokeBtn" class="btn" type="button">Get Another Joke</button>
+      </main>
     `;
   });
 
