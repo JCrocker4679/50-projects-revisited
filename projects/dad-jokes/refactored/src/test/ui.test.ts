@@ -15,6 +15,7 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  updateFavouriteButton,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -23,7 +24,10 @@ function setupDOM(): void {
     <div class="container">
       <h3>Don't Laugh Challenge</h3>
       <div class="joke" id="joke">// Joke goes here</div>
-      <button id="jokeBtn" class="btn">Get Another Joke</button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn">Get Another Joke</button>
+        <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
+      </div>
     </div>
   `;
 }
@@ -233,5 +237,52 @@ describe('UI: hideLoading()', () => {
     hideLoading();
     const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement;
     expect(jokeBtn.disabled).toBe(false);
+  });
+});
+
+describe('UI: updateFavouriteButton()', () => {
+  beforeEach(setupDOM);
+
+  it('sets aria-pressed to "true" when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('sets aria-pressed to "false" when not favourited', () => {
+    updateFavouriteButton(true);
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('sets aria-label to "Remove from favourites" when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-label')).toBe('Remove from favourites');
+  });
+
+  it('sets aria-label to "Add to favourites" when not favourited', () => {
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-label')).toBe('Add to favourites');
+  });
+
+  it('adds favourite-btn--active class when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.classList.contains('favourite-btn--active')).toBe(true);
+  });
+
+  it('removes favourite-btn--active class when not favourited', () => {
+    updateFavouriteButton(true);
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.classList.contains('favourite-btn--active')).toBe(false);
+  });
+
+  it('does nothing if button element is missing', () => {
+    document.getElementById('favouriteBtn')?.remove();
+    expect(() => updateFavouriteButton(true)).not.toThrow();
   });
 });

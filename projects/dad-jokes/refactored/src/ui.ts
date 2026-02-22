@@ -66,6 +66,18 @@ export function hideLoading(): void {
 }
 
 /**
+ * Update the favourite button to reflect current favourited state.
+ * Toggles aria-pressed and aria-label for accessibility.
+ */
+export function updateFavouriteButton(favourited: boolean): void {
+  const btn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', String(favourited));
+  btn.setAttribute('aria-label', favourited ? 'Remove from favourites' : 'Add to favourites');
+  btn.classList.toggle('favourite-btn--active', favourited);
+}
+
+/**
  * Display a joke in the joke element.
  * Clears any error/loading state.
  */
