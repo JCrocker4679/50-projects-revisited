@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src https://icanhazdadjoke.com; img-src 'self'; frame-src 'none'; base-uri 'self'; form-action 'none';"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src https://icanhazdadjoke.com https://va.vercel-insights.com; img-src 'self'; frame-src 'none'; base-uri 'self'; form-action 'none';"
     />
     <title>Dad Jokes</title>
     <meta name="description" content="Groan-worthy dad jokes on demand. Get a random joke, save your favourites, and share the pain. Free, no sign-up, no ads." />
@@ -39,8 +39,22 @@
       >Loading...</p>
       <div class="action-row">
         <button id="jokeBtn" class="btn" type="button">
-          Get Another Joke
+          Tell me another
         </button>
+        <button
+          id="copyBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-label="Copy joke to clipboard"
+          disabled
+        >📋</button>
+        <button
+          id="shareBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-label="Share joke"
+          disabled
+        >↗</button>
         <button
           id="favouriteBtn"
           class="btn btn--icon"
@@ -49,6 +63,25 @@
           aria-label="Add to favourites"
         >★</button>
       </div>
+      <nav class="history-nav" aria-label="Joke history navigation">
+        <button
+          id="prevBtn"
+          class="btn btn--nav"
+          type="button"
+          aria-label="Previous joke"
+          aria-disabled="true"
+          disabled
+        >← Prev</button>
+        <span class="history-counter" aria-live="polite" hidden></span>
+        <button
+          id="nextBtn"
+          class="btn btn--nav"
+          type="button"
+          aria-label="Next joke"
+          aria-disabled="true"
+          disabled
+        >Next →</button>
+      </nav>
       <div class="fav-toggle-row">
         <button
           id="favListBtn"

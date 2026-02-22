@@ -1,38 +1,42 @@
 /*
  * Dad Jokes — Styles
  *
- * Accessibility fixes (#10):
+ * Sprint 1 fixes:
  * - Replaced outline:0 with visible focus styles
  * - Fixed colour contrast to WCAG AA (4.5:1+)
  * - Removed overflow:hidden on body
  * - 44x44px minimum touch targets
  * - prefers-reduced-motion support
  * - CSS custom properties for all colours (theming prep)
- *
- * Responsive fixes (#11):
  * - Fluid typography with clamp()
- * - Mobile-first padding (24px mobile, 50px desktop)
- * - Responsive container
+ * - Mobile-first padding
  *
- * Self-hosted Roboto via @fontsource (imported in main.ts)
+ * Sprint 2 visual refresh (#38):
+ * - Warm amber/cream palette replacing tutorial purple
+ * - Action row for copy/share/favourite buttons
+ * - Icon button variant (btn--icon)
+ * - Joke text crossfade on change
+ * - Button copy: "Tell me another"
  */
 
 /* ===== Custom Properties ===== */
 :root {
-  --color-bg: #686de0;
-  --color-card: #ffffff;
-  --color-text: #1a1a2e;
-  --color-text-muted: #555555;
-  --color-btn: #7c3aed;
-  --color-btn-hover: #6d28d9;
-  --color-btn-text: #ffffff;
-  --color-focus: #2563eb;
-  --color-error: #dc2626;
+  --color-bg: #FFF8E7;
+  --color-card: #FFFFFF;
+  --color-text: #1C1A14;
+  --color-text-muted: #6B6353;
+  --color-btn: #D97706;
+  --color-btn-hover: #B45309;
+  --color-btn-text: #FFFFFF;
+  --color-focus: #1D4ED8;
+  --color-error: #DC2626;
+  --color-error-hover: #B91C1C;
+  --color-star-active: #D97706;
 
-  --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
-  --shadow-btn: 0 5px 15px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.08), 0 6px 6px rgba(0, 0, 0, 0.06);
+  --shadow-btn: 0 4px 12px rgba(217, 119, 6, 0.25);
 
-  --radius-card: 10px;
+  --radius-card: 12px;
   --radius-btn: 10px;
 }
 
@@ -52,7 +56,6 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  /* overflow: hidden REMOVED — prevents scrolling on long jokes */
   margin: 0;
   padding: 24px;
 }
@@ -72,7 +75,7 @@ body {
 .title {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -87,14 +90,97 @@ body {
   margin: 40px auto;
   max-width: 600px;
   min-height: 2em;
+  transition: opacity 0.2s ease;
 }
 
+.joke--loading {
+  position: relative;
+  color: #999;
+  opacity: 0.6;
+}
+
+.joke--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===== Error state ===== */
 .joke--error {
   color: var(--color-error);
   font-size: clamp(1rem, 3vw, 1.25rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-/* ===== Button ===== */
+.error-message {
+  display: block;
+}
+
+.retry-btn {
+  background-color: var(--color-error);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.retry-btn:hover {
+  background-color: var(--color-error-hover);
+}
+
+.retry-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.fallback-label {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+.fallback-joke {
+  display: block;
+  font-size: 22px;
+  color: var(--color-text);
+  font-style: italic;
+}
+
+/* ===== Action row ===== */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== Primary button ===== */
 .btn {
   background-color: var(--color-btn);
   border: 0;
@@ -106,10 +192,9 @@ body {
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  /* 44x44px minimum touch target */
   min-height: 44px;
   min-width: 44px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .btn:hover {
@@ -131,160 +216,43 @@ body {
   cursor: not-allowed;
 }
 
-/* ===== Reduced motion ===== */
-@media (prefers-reduced-motion: reduce) {
-  .btn:active {
-    transform: none;
-  }
-
-  .btn {
-    transition: none;
-  }
-}
-
-/* ===== Desktop breakpoint ===== */
-@media (min-width: 640px) {
-  body {
-    padding: 50px;
-  }
-
-  .container {
-    padding: 50px 40px;
-  }
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Loading state — shimmer overlay */
-.joke--loading {
-  position: relative;
-  color: #999;
-}
-
-.joke--loading::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .joke--loading::after {
-    animation: none;
-    background: rgba(255, 255, 255, 0.4);
-  }
-}
-
-/* Error state */
-.joke--error {
-  color: #c0392b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.error-message {
-  display: block;
-}
-
-.retry-btn {
-  background-color: #c0392b;
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-  min-height: 44px;
-  min-width: 44px;
-  transition: background-color 0.15s ease;
-}
-
-.retry-btn:hover {
-  background-color: #a93226;
-}
-
-.retry-btn:focus-visible {
-  outline: 3px solid #2563eb;
-  outline-offset: 2px;
-}
-
-.fallback-label {
-  display: block;
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
-}
-
-.fallback-joke {
-  display: block;
-  font-size: 22px;
-  color: #333;
-  font-style: italic;
-}
-
-/* ===== Action row ===== */
-.action-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* Icon button variant */
+/* Icon button variant — square, same height as primary btn */
 .btn--icon {
   padding: 0;
   width: 48px;
   height: 48px;
-  font-size: 1.4rem;
-  border-radius: var(--radius-btn, 10px);
+  font-size: 1.5rem;
+  line-height: 1;
+  border-radius: var(--radius-btn);
   background-color: transparent;
-  color: var(--color-text-muted, #555);
+  color: var(--color-text-muted);
   border: 2px solid currentColor;
   box-shadow: none;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .btn--icon:hover {
   background-color: transparent;
-  color: var(--color-btn, #7c3aed);
-  border-color: var(--color-btn, #7c3aed);
+  color: var(--color-btn);
+  border-color: var(--color-btn);
 }
 
+.btn--icon:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Active/pressed state for icon buttons (e.g. favourited) */
 .btn--icon.favourite-btn--active {
-  color: #d97706;
-  border-color: #d97706;
+  color: var(--color-star-active);
+  border-color: var(--color-star-active);
+  background-color: rgba(217, 119, 6, 0.08);
 }
 
 /* Ghost button variant */
 .btn--ghost {
   background-color: transparent;
-  color: var(--color-text-muted, #555);
+  color: var(--color-text-muted);
   border: 1px solid currentColor;
   box-shadow: none;
   padding: 10px 20px;
@@ -293,8 +261,32 @@ body {
 
 .btn--ghost:hover {
   background-color: transparent;
-  color: var(--color-text, #1a1a2e);
-  border-color: var(--color-text, #1a1a2e);
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+/* ===== History navigation ===== */
+.history-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn--nav {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.history-counter {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  min-width: 3rem;
+  text-align: center;
 }
 
 /* ===== Favourites panel ===== */
@@ -313,7 +305,7 @@ body {
 }
 
 .fav-empty {
-  color: var(--color-text-muted, #555);
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   text-align: center;
   padding: 16px 0;
@@ -347,7 +339,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-text-muted, #555);
+  color: var(--color-text-muted);
   font-size: 1rem;
   padding: 4px 8px;
   min-height: 44px;
@@ -357,10 +349,40 @@ body {
 }
 
 .fav-item__delete:hover {
-  color: var(--color-error, #dc2626);
+  color: var(--color-error);
 }
 
 .fav-item__delete:focus-visible {
-  outline: 3px solid var(--color-focus, #2563eb);
+  outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn--icon,
+  .retry-btn,
+  .joke {
+    transition: none;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+
+  .joke--loading::after {
+    animation: none;
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ===== Desktop breakpoint ===== */
+@media (min-width: 640px) {
+  body {
+    padding: 50px;
+  }
+
+  .container {
+    padding: 50px 40px;
+  }
 }

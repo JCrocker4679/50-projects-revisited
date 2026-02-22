@@ -4,9 +4,19 @@
 
 import type { Joke } from './types.ts';
 
+/** Storage schema version for future migrations */
 export const STORAGE_VERSION = 1;
 
+const HISTORY_KEY = 'dad-jokes-history-v1';
 const FAVOURITES_KEY = 'dad-jokes-favourites-v1';
+
+export function loadHistory(): Joke[] {
+  return loadJsonArray(HISTORY_KEY);
+}
+
+export function saveHistory(history: Joke[]): void {
+  saveJson(HISTORY_KEY, history);
+}
 
 export function loadFavourites(): Joke[] {
   return loadJsonArray(FAVOURITES_KEY);
@@ -32,6 +42,6 @@ function saveJson(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Storage quota exceeded — fail silently
+    // Storage quota exceeded or unavailable — fail silently
   }
 }
