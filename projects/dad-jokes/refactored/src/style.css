@@ -246,3 +246,27 @@ body {
   color: #333;
   font-style: italic;
 }
+
+/* ===== History navigation ===== */
+.history-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn--nav {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.history-counter {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #555);
+  min-width: 3rem;
+  text-align: center;
+}

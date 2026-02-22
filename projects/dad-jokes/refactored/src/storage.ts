@@ -1,9 +1,38 @@
 /**
  * localStorage persistence module.
- *
- * Sprint 1: Placeholder module. No persistence needed yet.
- * Sprint 2: Will handle favourites, history, and schema versioning.
  */
+
+import type { Joke } from './types.ts';
 
 /** Storage schema version for future migrations */
 export const STORAGE_VERSION = 1;
+
+const HISTORY_KEY = 'dad-jokes-history-v1';
+
+export function loadHistory(): Joke[] {
+  return loadJsonArray(HISTORY_KEY);
+}
+
+export function saveHistory(history: Joke[]): void {
+  saveJson(HISTORY_KEY, history);
+}
+
+function loadJsonArray(key: string): Joke[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed as Joke[];
+  } catch {
+    return [];
+  }
+}
+
+function saveJson(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage quota exceeded or unavailable — fail silently
+  }
+}

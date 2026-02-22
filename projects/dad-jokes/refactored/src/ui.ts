@@ -25,6 +25,40 @@ export function setRetryHandler(handler: () => void): void {
 }
 
 /**
+ * Update history navigation buttons and counter.
+ * Disables prevBtn at oldest joke, nextBtn at newest.
+ * Counter hidden when history is empty.
+ */
+export function renderHistoryNav(index: number, total: number): void {
+  const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
+  const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
+  const counter = document.querySelector('.history-counter') as HTMLElement | null;
+
+  const atNewest = index === 0;
+  const atOldest = total === 0 || index === total - 1;
+
+  if (prevBtn) {
+    prevBtn.disabled = atOldest;
+    prevBtn.setAttribute('aria-disabled', String(atOldest));
+  }
+
+  if (nextBtn) {
+    nextBtn.disabled = atNewest;
+    nextBtn.setAttribute('aria-disabled', String(atNewest));
+  }
+
+  if (counter) {
+    if (total === 0) {
+      counter.textContent = '';
+      counter.hidden = true;
+    } else {
+      counter.textContent = `${index + 1} / ${total}`;
+      counter.hidden = false;
+    }
+  }
+}
+
+/**
  * Show loading state.
  * Disables button and adds aria-busy for screen readers.
  */

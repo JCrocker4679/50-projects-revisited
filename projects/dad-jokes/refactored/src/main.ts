@@ -8,19 +8,29 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  renderHistoryNav,
 } from './ui.ts';
+import {
+  initHistory,
+  addToHistory,
+  navigateHistory,
+  getHistory,
+  getHistoryIndex,
+} from './state.ts';
 
 /**
  * Main entry point.
- *
- * Fetches a joke on page load and on button click.
- * Shows loading state during fetch, handles errors gracefully.
- * Caches last successful joke for fallback on error.
  */
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
+const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
+
+function updateHistoryNav(): void {
+  renderHistoryNav(getHistoryIndex(), getHistory().length);
+}
 
 async function generateJoke(): Promise<void> {
   showLoading(isFirstLoad);
@@ -29,6 +39,8 @@ async function generateJoke(): Promise<void> {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
     renderJoke(joke.joke);
+    addToHistory(joke);
+    updateHistoryNav();
   } catch (error) {
     const cached = lastJoke ?? undefined;
     if (error instanceof ApiError) {
@@ -42,10 +54,22 @@ async function generateJoke(): Promise<void> {
   }
 }
 
-// Wire up retry handler so the retry button in error state can trigger a new fetch
+function handleHistoryNav(direction: 'back' | 'forward'): void {
+  const joke = navigateHistory(direction);
+  if (!joke) return;
+  renderJoke(joke.joke);
+  updateHistoryNav();
+}
+
+// Seed history state from localStorage
+initHistory();
+
+// Wire up retry handler
 setRetryHandler(generateJoke);
 
 jokeBtn?.addEventListener('click', generateJoke);
+prevBtn?.addEventListener('click', () => handleHistoryNav('back'));
+nextBtn?.addEventListener('click', () => handleHistoryNav('forward'));
 
 // Load first joke immediately
 generateJoke();
