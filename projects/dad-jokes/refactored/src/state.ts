@@ -1,7 +1,8 @@
 import type { AppState, Joke } from './types.ts';
-import { loadHistory, saveHistory } from './storage.ts';
+import { loadHistory, saveHistory, loadFavourites, saveFavourites } from './storage.ts';
 
 const MAX_HISTORY = 50;
+const MAX_FAVOURITES = 100;
 
 const state: AppState = {
   currentJoke: null,
@@ -9,6 +10,7 @@ const state: AppState = {
   error: null,
   history: [],
   historyIndex: 0,
+  favourites: [],
 };
 
 // --- Current joke ---
@@ -78,4 +80,27 @@ export function isAtHistoryStart(): boolean {
 
 export function isAtHistoryEnd(): boolean {
   return state.history.length === 0 || state.historyIndex === state.history.length - 1;
+}
+
+// --- Favourites ---
+
+export function initFavourites(): void {
+  state.favourites = loadFavourites();
+}
+
+export function getFavourites(): Joke[] {
+  return state.favourites;
+}
+
+export function isFavourited(jokeId: string): boolean {
+  return state.favourites.some((j) => j.id === jokeId);
+}
+
+export function toggleFavourite(joke: Joke): void {
+  if (isFavourited(joke.id)) {
+    state.favourites = state.favourites.filter((j) => j.id !== joke.id);
+  } else {
+    state.favourites = [joke, ...state.favourites].slice(0, MAX_FAVOURITES);
+  }
+  saveFavourites(state.favourites);
 }

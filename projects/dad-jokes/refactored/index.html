@@ -37,9 +37,18 @@
         aria-live="polite"
         aria-atomic="true"
       >Loading...</p>
-      <button id="jokeBtn" class="btn" type="button">
-        Get Another Joke
-      </button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn" type="button">
+          Get Another Joke
+        </button>
+        <button
+          id="favouriteBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-pressed="false"
+          aria-label="Add to favourites"
+        >★</button>
+      </div>
     </main>
 
     <noscript>

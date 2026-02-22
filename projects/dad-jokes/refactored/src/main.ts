@@ -9,8 +9,16 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  updateFavouriteButton,
 } from './ui.ts';
-import { initHistory, addToHistory } from './state.ts';
+import {
+  getCurrentJoke,
+  initHistory,
+  addToHistory,
+  initFavourites,
+  isFavourited,
+  toggleFavourite,
+} from './state.ts';
 import { trackJokeFetched, trackErrorShown, trackRetryClicked } from './analytics.ts';
 
 // Initialise Vercel Analytics (page views + custom events)
@@ -25,6 +33,7 @@ inject();
  */
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 
@@ -36,6 +45,7 @@ async function generateJoke(): Promise<void> {
     lastJoke = joke.joke;
     renderJoke(joke.joke);
     addToHistory(joke);
+    updateFavouriteButton(isFavourited(joke.id));
     trackJokeFetched(joke.id);
   } catch (error) {
     const cached = lastJoke ?? undefined;
@@ -52,8 +62,9 @@ async function generateJoke(): Promise<void> {
   }
 }
 
-// Seed history state from localStorage
+// Seed state from localStorage
 initHistory();
+initFavourites();
 
 // Wire up retry handler so the retry button in error state can trigger a new fetch
 setRetryHandler(() => {
@@ -62,6 +73,13 @@ setRetryHandler(() => {
 });
 
 jokeBtn?.addEventListener('click', generateJoke);
+
+favouriteBtn?.addEventListener('click', () => {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+  toggleFavourite(joke);
+  updateFavouriteButton(isFavourited(joke.id));
+});
 
 // Load first joke immediately
 generateJoke();

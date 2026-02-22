@@ -22,4 +22,5 @@ export interface AppState {
   error: string | null;
   history: Joke[];
   historyIndex: number;
+  favourites: Joke[];
 }
