@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] — Sprint 2
 
 ### Added
+- Visual refresh: warm amber/cream colour palette replacing tutorial purple; action row layout for secondary buttons; icon button variant (`btn--icon`) with hover/active states
 - Favourites: star/unstar jokes with localStorage persistence (`dad-jokes-favourites-v1`); star button in action row with `aria-pressed` support
 - Joke history: stores last 50 jokes in localStorage (`dad-jokes-history-v1`); `navigateHistory()` for back/forward traversal
 - Vercel Analytics: page-view tracking via `inject()` on load; custom events for `joke_fetched`, `error_shown`, `retry_clicked`, `joke_copied`, `joke_shared`, `favourite_added`, `favourite_removed`, `history_navigated`
@@ -12,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - OG image: real 1200×630 PNG replacing placeholder, for proper social sharing previews
 
 ### Changed
+- Main button label: "Get Another Joke" → "Tell me another"
+- Joke text fade on load (CSS opacity transition, respects `prefers-reduced-motion`)
+- Error colours now use CSS custom properties (no more hardcoded hex in error styles)
 - Content Security Policy updated to allow `https://va.vercel-insights.com` for analytics
 
 ---
