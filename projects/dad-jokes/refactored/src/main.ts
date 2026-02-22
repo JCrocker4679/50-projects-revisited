@@ -10,6 +10,7 @@ import {
   hideLoading,
   setRetryHandler,
 } from './ui.ts';
+import { initHistory, addToHistory } from './state.ts';
 import { trackJokeFetched, trackErrorShown, trackRetryClicked } from './analytics.ts';
 
 // Initialise Vercel Analytics (page views + custom events)
@@ -34,6 +35,7 @@ async function generateJoke(): Promise<void> {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
     renderJoke(joke.joke);
+    addToHistory(joke);
     trackJokeFetched(joke.id);
   } catch (error) {
     const cached = lastJoke ?? undefined;
@@ -49,6 +51,9 @@ async function generateJoke(): Promise<void> {
     isFirstLoad = false;
   }
 }
+
+// Seed history state from localStorage
+initHistory();
 
 // Wire up retry handler so the retry button in error state can trigger a new fetch
 setRetryHandler(() => {

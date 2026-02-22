@@ -20,4 +20,6 @@ export interface AppState {
   currentJoke: Joke | null;
   isLoading: boolean;
   error: string | null;
+  history: Joke[];
+  historyIndex: number;
 }
