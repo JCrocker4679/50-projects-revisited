@@ -6,9 +6,12 @@
  * - renderError() shows error message, retry button, cached joke fallback
  * - showLoading() / hideLoading() toggle aria-busy and button state
  * - setRetryHandler() wires the retry callback
+ * - renderHistoryNav() — history nav button states and counter
+ * - showCopyFeedback() / setCopyButtonEnabled() — copy button behaviour
+ * - updateFavouriteButton() — favourite button state
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   renderJoke,
   renderError,
@@ -16,6 +19,9 @@ import {
   hideLoading,
   setRetryHandler,
   renderHistoryNav,
+  showCopyFeedback,
+  setCopyButtonEnabled,
+  updateFavouriteButton,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -26,6 +32,8 @@ function setupDOM(): void {
       <div class="joke" id="joke">// Joke goes here</div>
       <div class="action-row">
         <button id="jokeBtn" class="btn">Get Another Joke</button>
+        <button id="copyBtn" class="btn btn--icon" aria-label="Copy joke to clipboard" disabled>📋</button>
+        <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
       </div>
       <nav class="history-nav" aria-label="Joke history navigation">
         <button id="prevBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Previous joke">← Prev</button>
@@ -169,8 +177,6 @@ describe('UI: renderError()', () => {
     renderJoke('Old joke');
     renderError('error', 'network');
     const jokeEl = document.getElementById('joke');
-    // Should not contain the old joke text directly as textContent
-    // The error message should be in the .error-message span
     expect(jokeEl?.querySelector('.error-message')?.textContent).toContain(
       'joke factory',
     );
@@ -290,5 +296,107 @@ describe('UI: renderHistoryNav()', () => {
     renderHistoryNav(0, 3);
     const counter = document.querySelector('.history-counter') as HTMLElement;
     expect(counter.hidden).toBe(false);
+  });
+});
+
+describe('UI: showCopyFeedback()', () => {
+  beforeEach(() => {
+    setupDOM();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('shows success: changes button text and aria-label', () => {
+    showCopyFeedback(true);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('✓');
+    expect(btn?.getAttribute('aria-label')).toBe('Copied!');
+  });
+
+  it('shows failure: changes button text and aria-label', () => {
+    showCopyFeedback(false);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('✗');
+    expect(btn?.getAttribute('aria-label')).toBe('Copy failed');
+  });
+
+  it('resets button text after 2s', () => {
+    showCopyFeedback(true);
+    vi.advanceTimersByTime(2000);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('📋');
+    expect(btn?.getAttribute('aria-label')).toBe('Copy joke to clipboard');
+  });
+
+  it('does nothing if button is missing', () => {
+    document.getElementById('copyBtn')?.remove();
+    expect(() => showCopyFeedback(true)).not.toThrow();
+  });
+});
+
+describe('UI: setCopyButtonEnabled()', () => {
+  beforeEach(setupDOM);
+
+  it('enables the copy button', () => {
+    setCopyButtonEnabled(true);
+    const btn = document.getElementById('copyBtn') as HTMLButtonElement;
+    expect(btn.disabled).toBe(false);
+  });
+
+  it('disables the copy button', () => {
+    setCopyButtonEnabled(true);
+    setCopyButtonEnabled(false);
+    const btn = document.getElementById('copyBtn') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+  });
+});
+
+describe('UI: updateFavouriteButton()', () => {
+  beforeEach(setupDOM);
+
+  it('sets aria-pressed to "true" when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('sets aria-pressed to "false" when not favourited', () => {
+    updateFavouriteButton(true);
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('sets aria-label to "Remove from favourites" when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-label')).toBe('Remove from favourites');
+  });
+
+  it('sets aria-label to "Add to favourites" when not favourited', () => {
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.getAttribute('aria-label')).toBe('Add to favourites');
+  });
+
+  it('adds favourite-btn--active class when favourited', () => {
+    updateFavouriteButton(true);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.classList.contains('favourite-btn--active')).toBe(true);
+  });
+
+  it('removes favourite-btn--active class when not favourited', () => {
+    updateFavouriteButton(true);
+    updateFavouriteButton(false);
+    const btn = document.getElementById('favouriteBtn');
+    expect(btn?.classList.contains('favourite-btn--active')).toBe(false);
+  });
+
+  it('does nothing if button element is missing', () => {
+    document.getElementById('favouriteBtn')?.remove();
+    expect(() => updateFavouriteButton(true)).not.toThrow();
   });
 });

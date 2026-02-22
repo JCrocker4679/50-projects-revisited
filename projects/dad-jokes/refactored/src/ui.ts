@@ -24,6 +24,42 @@ export function setRetryHandler(handler: () => void): void {
   retryHandler = handler;
 }
 
+const COPY_RESET_MS = 2000;
+let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Show copy feedback on the copy button.
+ * Changes text/label for 2s then resets to original state.
+ */
+export function showCopyFeedback(success: boolean): void {
+  const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+
+  if (copyResetTimer) clearTimeout(copyResetTimer);
+
+  if (success) {
+    btn.textContent = '✓';
+    btn.setAttribute('aria-label', 'Copied!');
+  } else {
+    btn.textContent = '✗';
+    btn.setAttribute('aria-label', 'Copy failed');
+  }
+
+  copyResetTimer = setTimeout(() => {
+    btn.textContent = '📋';
+    btn.setAttribute('aria-label', 'Copy joke to clipboard');
+    copyResetTimer = null;
+  }, COPY_RESET_MS);
+}
+
+/**
+ * Enable or disable the copy button.
+ */
+export function setCopyButtonEnabled(enabled: boolean): void {
+  const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+  if (btn) btn.disabled = !enabled;
+}
+
 /**
  * Update history navigation buttons and counter.
  * Disables prevBtn at oldest joke, nextBtn at newest.
@@ -97,6 +133,18 @@ export function hideLoading(): void {
   if (jokeBtn) {
     jokeBtn.disabled = false;
   }
+}
+
+/**
+ * Update the favourite button to reflect current favourited state.
+ * Toggles aria-pressed and aria-label for accessibility.
+ */
+export function updateFavouriteButton(favourited: boolean): void {
+  const btn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', String(favourited));
+  btn.setAttribute('aria-label', favourited ? 'Remove from favourites' : 'Add to favourites');
+  btn.classList.toggle('favourite-btn--active', favourited);
 }
 
 /**
