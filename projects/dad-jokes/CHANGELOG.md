@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added (Sprint 2)
+- OG image: replaced placeholder SVG with real PNG (1200×630) for social sharing
+
+## [Sprint 1] — 2026-02-19
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)
