@@ -15,6 +15,10 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  updateFavouriteButton,
+  updateFavouritesCount,
+  toggleFavouritesPanel,
+  renderFavouritesList,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -23,7 +27,16 @@ function setupDOM(): void {
     <div class="container">
       <h3>Don't Laugh Challenge</h3>
       <div class="joke" id="joke">// Joke goes here</div>
-      <button id="jokeBtn" class="btn">Get Another Joke</button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn">Get Another Joke</button>
+        <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
+      </div>
+      <div class="fav-toggle-row">
+        <button id="favListBtn" class="btn btn--ghost" aria-expanded="false" aria-controls="favPanel">
+          My Favourites (<span id="favCount">0</span>)
+        </button>
+      </div>
+      <section id="favPanel" class="fav-panel" hidden aria-label="Saved favourites"></section>
     </div>
   `;
 }
@@ -233,5 +246,93 @@ describe('UI: hideLoading()', () => {
     hideLoading();
     const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement;
     expect(jokeBtn.disabled).toBe(false);
+  });
+});
+
+describe('UI: updateFavouriteButton()', () => {
+  beforeEach(setupDOM);
+
+  it('sets aria-pressed true when favourited', () => {
+    updateFavouriteButton(true);
+    expect(document.getElementById('favouriteBtn')?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('sets aria-pressed false when not favourited', () => {
+    updateFavouriteButton(true);
+    updateFavouriteButton(false);
+    expect(document.getElementById('favouriteBtn')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('updates aria-label to remove when favourited', () => {
+    updateFavouriteButton(true);
+    expect(document.getElementById('favouriteBtn')?.getAttribute('aria-label')).toBe('Remove from favourites');
+  });
+
+  it('toggles favourite-btn--active class', () => {
+    updateFavouriteButton(true);
+    expect(document.getElementById('favouriteBtn')?.classList.contains('favourite-btn--active')).toBe(true);
+    updateFavouriteButton(false);
+    expect(document.getElementById('favouriteBtn')?.classList.contains('favourite-btn--active')).toBe(false);
+  });
+});
+
+describe('UI: updateFavouritesCount()', () => {
+  beforeEach(setupDOM);
+
+  it('updates the count text', () => {
+    updateFavouritesCount(5);
+    expect(document.getElementById('favCount')?.textContent).toBe('5');
+  });
+});
+
+describe('UI: toggleFavouritesPanel()', () => {
+  beforeEach(setupDOM);
+
+  it('shows panel when open=true', () => {
+    toggleFavouritesPanel(true);
+    expect((document.getElementById('favPanel') as HTMLElement).hidden).toBe(false);
+  });
+
+  it('hides panel when open=false', () => {
+    toggleFavouritesPanel(true);
+    toggleFavouritesPanel(false);
+    expect((document.getElementById('favPanel') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('updates aria-expanded on toggle button', () => {
+    toggleFavouritesPanel(true);
+    expect(document.getElementById('favListBtn')?.getAttribute('aria-expanded')).toBe('true');
+    toggleFavouritesPanel(false);
+    expect(document.getElementById('favListBtn')?.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('UI: renderFavouritesList()', () => {
+  beforeEach(setupDOM);
+
+  it('renders one item per joke', () => {
+    const jokes = [{ id: 'a', joke: 'Joke A' }, { id: 'b', joke: 'Joke B' }];
+    renderFavouritesList(jokes, vi.fn());
+    expect(document.querySelectorAll('.fav-item')).toHaveLength(2);
+  });
+
+  it('shows empty state when list is empty', () => {
+    renderFavouritesList([], vi.fn());
+    expect(document.querySelector('.fav-empty')).not.toBeNull();
+    expect(document.querySelector('.fav-list')).toBeNull();
+  });
+
+  it('calls onDelete with correct id when delete button clicked', () => {
+    const onDelete = vi.fn();
+    renderFavouritesList([{ id: 'x', joke: 'Joke X' }], onDelete);
+    (document.querySelector('.fav-item__delete') as HTMLButtonElement).click();
+    expect(onDelete).toHaveBeenCalledWith('x');
+  });
+
+  it('renders joke text as textContent (not innerHTML)', () => {
+    renderFavouritesList([{ id: '1', joke: '<script>alert(1)</script>' }], vi.fn());
+    const text = document.querySelector('.fav-item__text');
+    expect(text?.textContent).toBe('<script>alert(1)</script>');
+    expect(document.querySelector('script')).toBeNull();
   });
 });

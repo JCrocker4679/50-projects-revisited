@@ -37,9 +37,29 @@
         aria-live="polite"
         aria-atomic="true"
       >Loading...</p>
-      <button id="jokeBtn" class="btn" type="button">
-        Get Another Joke
-      </button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn" type="button">
+          Get Another Joke
+        </button>
+        <button
+          id="favouriteBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-pressed="false"
+          aria-label="Add to favourites"
+        >★</button>
+      </div>
+      <div class="fav-toggle-row">
+        <button
+          id="favListBtn"
+          class="btn btn--ghost"
+          type="button"
+          aria-expanded="false"
+          aria-controls="favPanel"
+        >My Favourites (<span id="favCount">0</span>)</button>
+      </div>
+      <section id="favPanel" class="fav-panel" hidden aria-label="Saved favourites">
+      </section>
     </main>
 
     <noscript>

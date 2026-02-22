@@ -8,19 +8,40 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  updateFavouriteButton,
+  updateFavouritesCount,
+  toggleFavouritesPanel,
+  renderFavouritesList,
 } from './ui.ts';
-
-/**
- * Main entry point.
- *
- * Fetches a joke on page load and on button click.
- * Shows loading state during fetch, handles errors gracefully.
- * Caches last successful joke for fallback on error.
- */
+import {
+  getCurrentJoke,
+  setCurrentJoke,
+  initFavourites,
+  getFavourites,
+  isFavourited,
+  toggleFavourite,
+} from './state.ts';
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
+const favListBtn = document.getElementById('favListBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
+let favPanelOpen = false;
+
+function refreshFavouritesUI(): void {
+  const favs = getFavourites();
+  updateFavouritesCount(favs.length);
+  if (favPanelOpen) {
+    renderFavouritesList(favs, (id) => {
+      const joke = favs.find((j) => j.id === id);
+      if (joke) toggleFavourite(joke);
+      const current = getCurrentJoke();
+      if (current) updateFavouriteButton(isFavourited(current.id));
+      refreshFavouritesUI();
+    });
+  }
+}
 
 async function generateJoke(): Promise<void> {
   showLoading(isFirstLoad);
@@ -28,7 +49,9 @@ async function generateJoke(): Promise<void> {
   try {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
+    setCurrentJoke(joke);
     renderJoke(joke.joke);
+    updateFavouriteButton(isFavourited(joke.id));
   } catch (error) {
     const cached = lastJoke ?? undefined;
     if (error instanceof ApiError) {
@@ -42,10 +65,34 @@ async function generateJoke(): Promise<void> {
   }
 }
 
-// Wire up retry handler so the retry button in error state can trigger a new fetch
+// Seed from localStorage
+initFavourites();
+refreshFavouritesUI();
+
 setRetryHandler(generateJoke);
 
 jokeBtn?.addEventListener('click', generateJoke);
 
-// Load first joke immediately
+favouriteBtn?.addEventListener('click', () => {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+  toggleFavourite(joke);
+  updateFavouriteButton(isFavourited(joke.id));
+  refreshFavouritesUI();
+});
+
+favListBtn?.addEventListener('click', () => {
+  favPanelOpen = !favPanelOpen;
+  toggleFavouritesPanel(favPanelOpen);
+  if (favPanelOpen) {
+    renderFavouritesList(getFavourites(), (id) => {
+      const joke = getFavourites().find((j) => j.id === id);
+      if (joke) toggleFavourite(joke);
+      const current = getCurrentJoke();
+      if (current) updateFavouriteButton(isFavourited(current.id));
+      refreshFavouritesUI();
+    });
+  }
+});
+
 generateJoke();

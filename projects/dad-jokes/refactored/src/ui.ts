@@ -25,6 +25,86 @@ export function setRetryHandler(handler: () => void): void {
 }
 
 /**
+ * Update the favourite (star) button aria state.
+ */
+export function updateFavouriteButton(favourited: boolean): void {
+  const btn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.setAttribute('aria-pressed', String(favourited));
+  btn.setAttribute('aria-label', favourited ? 'Remove from favourites' : 'Add to favourites');
+  btn.classList.toggle('favourite-btn--active', favourited);
+}
+
+/**
+ * Update the count badge in the favourites toggle button.
+ */
+export function updateFavouritesCount(count: number): void {
+  const el = document.getElementById('favCount');
+  if (el) el.textContent = String(count);
+}
+
+/**
+ * Show or hide the favourites panel and sync aria-expanded.
+ */
+export function toggleFavouritesPanel(open: boolean): void {
+  const panel = document.getElementById('favPanel') as HTMLElement | null;
+  const btn = document.getElementById('favListBtn') as HTMLButtonElement | null;
+  if (panel) panel.hidden = !open;
+  if (btn) btn.setAttribute('aria-expanded', String(open));
+}
+
+import type { Joke } from './types.ts';
+
+/**
+ * Render the favourites list into the panel.
+ * Each item has a delete button; onDelete is called with the joke id.
+ * Uses DOM methods (not innerHTML) per XSS policy.
+ */
+export function renderFavouritesList(
+  favourites: Joke[],
+  onDelete: (id: string) => void,
+): void {
+  const panel = document.getElementById('favPanel');
+  if (!panel) return;
+
+  // Clear previous content
+  panel.textContent = '';
+
+  if (favourites.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'fav-empty';
+    empty.textContent = 'No saved jokes yet. Star a joke to save it.';
+    panel.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement('ul');
+  list.className = 'fav-list';
+
+  for (const joke of favourites) {
+    const item = document.createElement('li');
+    item.className = 'fav-item';
+
+    const text = document.createElement('span');
+    text.className = 'fav-item__text';
+    text.textContent = joke.joke;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'fav-item__delete';
+    deleteBtn.type = 'button';
+    deleteBtn.setAttribute('aria-label', 'Remove from favourites');
+    deleteBtn.textContent = '✕';
+    deleteBtn.addEventListener('click', () => onDelete(joke.id));
+
+    item.appendChild(text);
+    item.appendChild(deleteBtn);
+    list.appendChild(item);
+  }
+
+  panel.appendChild(list);
+}
+
+/**
  * Show loading state.
  * Disables button and adds aria-busy for screen readers.
  */
