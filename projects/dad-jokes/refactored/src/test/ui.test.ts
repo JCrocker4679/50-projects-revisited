@@ -6,6 +6,7 @@
  * - renderError() shows error message, retry button, cached joke fallback
  * - showLoading() / hideLoading() toggle aria-busy and button state
  * - setRetryHandler() wires the retry callback
+ * - renderHistoryNav() — history nav button states and counter
  * - showCopyFeedback() / setCopyButtonEnabled() — copy button behaviour
  * - updateFavouriteButton() — favourite button state
  */
@@ -17,6 +18,7 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  renderHistoryNav,
   showCopyFeedback,
   setCopyButtonEnabled,
   updateFavouriteButton,
@@ -33,6 +35,11 @@ function setupDOM(): void {
         <button id="copyBtn" class="btn btn--icon" aria-label="Copy joke to clipboard" disabled>📋</button>
         <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
       </div>
+      <nav class="history-nav" aria-label="Joke history navigation">
+        <button id="prevBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Previous joke">← Prev</button>
+        <span class="history-counter" aria-live="polite" hidden></span>
+        <button id="nextBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Next joke">Next →</button>
+      </nav>
     </div>
   `;
 }
@@ -240,6 +247,55 @@ describe('UI: hideLoading()', () => {
     hideLoading();
     const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement;
     expect(jokeBtn.disabled).toBe(false);
+  });
+});
+
+describe('UI: renderHistoryNav()', () => {
+  beforeEach(setupDOM);
+
+  it('disables prevBtn when at oldest joke (index === total - 1)', () => {
+    renderHistoryNav(4, 5); // index 4 = oldest in 5-item list
+    const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement;
+    expect(prevBtn.disabled).toBe(true);
+    expect(prevBtn.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('enables prevBtn when not at oldest', () => {
+    renderHistoryNav(0, 5); // index 0 = newest
+    const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement;
+    expect(prevBtn.disabled).toBe(false);
+  });
+
+  it('disables nextBtn when at newest (index === 0)', () => {
+    renderHistoryNav(0, 5);
+    const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement;
+    expect(nextBtn.disabled).toBe(true);
+    expect(nextBtn.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('enables nextBtn when not at newest', () => {
+    renderHistoryNav(2, 5);
+    const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement;
+    expect(nextBtn.disabled).toBe(false);
+  });
+
+  it('shows correct counter text', () => {
+    renderHistoryNav(2, 10);
+    const counter = document.querySelector('.history-counter');
+    expect(counter?.textContent).toBe('3 / 10');
+  });
+
+  it('hides counter when history is empty (total === 0)', () => {
+    renderHistoryNav(0, 0);
+    const counter = document.querySelector('.history-counter') as HTMLElement;
+    expect(counter.hidden).toBe(true);
+    expect(counter.textContent).toBe('');
+  });
+
+  it('shows counter when history has items', () => {
+    renderHistoryNav(0, 3);
+    const counter = document.querySelector('.history-counter') as HTMLElement;
+    expect(counter.hidden).toBe(false);
   });
 });
 

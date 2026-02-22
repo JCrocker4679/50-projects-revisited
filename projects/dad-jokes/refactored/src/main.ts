@@ -9,6 +9,7 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  renderHistoryNav,
   showCopyFeedback,
   setCopyButtonEnabled,
   updateFavouriteButton,
@@ -18,6 +19,9 @@ import {
   setCurrentJoke,
   initHistory,
   addToHistory,
+  navigateHistory,
+  getHistory,
+  getHistoryIndex,
   initFavourites,
   isFavourited,
   toggleFavourite,
@@ -29,17 +33,19 @@ inject();
 
 /**
  * Main entry point.
- *
- * Fetches a joke on page load and on button click.
- * Shows loading state during fetch, handles errors gracefully.
- * Caches last successful joke for fallback on error.
  */
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
+const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
 const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
 const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
+
+function updateHistoryNav(): void {
+  renderHistoryNav(getHistoryIndex(), getHistory().length);
+}
 
 async function generateJoke(): Promise<void> {
   setCopyButtonEnabled(false);
@@ -52,6 +58,7 @@ async function generateJoke(): Promise<void> {
     renderJoke(joke.joke);
     setCopyButtonEnabled(true);
     addToHistory(joke);
+    updateHistoryNav();
     updateFavouriteButton(isFavourited(joke.id));
     trackJokeFetched(joke.id);
   } catch (error) {
@@ -94,6 +101,13 @@ async function copyJoke(): Promise<void> {
   }
 }
 
+function handleHistoryNav(direction: 'back' | 'forward'): void {
+  const joke = navigateHistory(direction);
+  if (!joke) return;
+  renderJoke(joke.joke);
+  updateHistoryNav();
+}
+
 // Seed state from localStorage
 initHistory();
 initFavourites();
@@ -105,6 +119,8 @@ setRetryHandler(() => {
 });
 
 jokeBtn?.addEventListener('click', generateJoke);
+prevBtn?.addEventListener('click', () => handleHistoryNav('back'));
+nextBtn?.addEventListener('click', () => handleHistoryNav('forward'));
 copyBtn?.addEventListener('click', copyJoke);
 
 favouriteBtn?.addEventListener('click', () => {
