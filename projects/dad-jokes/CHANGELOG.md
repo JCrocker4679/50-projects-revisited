@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] — Sprint 2
 
 ### Added
+- Copy joke to clipboard button; shows "✓ Copied!" feedback for 2s, resets automatically; falls back to `execCommand` on older browsers
 - Visual refresh: warm amber/cream colour palette replacing tutorial purple; action row layout for secondary buttons; icon button variant (`btn--icon`) with hover/active states
 - Favourites: star/unstar jokes with localStorage persistence (`dad-jokes-favourites-v1`); star button in action row with `aria-pressed` support
 - Joke history: stores last 50 jokes in localStorage (`dad-jokes-history-v1`); `navigateHistory()` for back/forward traversal

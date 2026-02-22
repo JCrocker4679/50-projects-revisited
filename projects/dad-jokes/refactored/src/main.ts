@@ -9,10 +9,13 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  showCopyFeedback,
+  setCopyButtonEnabled,
   updateFavouriteButton,
 } from './ui.ts';
 import {
   getCurrentJoke,
+  setCurrentJoke,
   initHistory,
   addToHistory,
   initFavourites,
@@ -33,17 +36,21 @@ inject();
  */
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
 const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 
 async function generateJoke(): Promise<void> {
+  setCopyButtonEnabled(false);
   showLoading(isFirstLoad);
 
   try {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
+    setCurrentJoke(joke);
     renderJoke(joke.joke);
+    setCopyButtonEnabled(true);
     addToHistory(joke);
     updateFavouriteButton(isFavourited(joke.id));
     trackJokeFetched(joke.id);
@@ -62,6 +69,31 @@ async function generateJoke(): Promise<void> {
   }
 }
 
+async function copyJoke(): Promise<void> {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+
+  try {
+    await navigator.clipboard.writeText(joke.joke);
+    showCopyFeedback(true);
+  } catch {
+    // Fallback for older browsers / non-HTTPS environments
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = joke.joke;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopyFeedback(true);
+    } catch {
+      showCopyFeedback(false);
+    }
+  }
+}
+
 // Seed state from localStorage
 initHistory();
 initFavourites();
@@ -73,6 +105,7 @@ setRetryHandler(() => {
 });
 
 jokeBtn?.addEventListener('click', generateJoke);
+copyBtn?.addEventListener('click', copyJoke);
 
 favouriteBtn?.addEventListener('click', () => {
   const joke = getCurrentJoke();
