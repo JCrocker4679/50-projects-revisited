@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Sprint 1]
+## [Sprint 1] — 2026-02-19
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)
