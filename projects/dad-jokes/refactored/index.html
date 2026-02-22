@@ -82,6 +82,17 @@
           disabled
         >Next →</button>
       </nav>
+      <div class="fav-toggle-row">
+        <button
+          id="favListBtn"
+          class="btn btn--ghost"
+          type="button"
+          aria-expanded="false"
+          aria-controls="favPanel"
+        >My Favourites (<span id="favCount">0</span>)</button>
+      </div>
+      <section id="favPanel" class="fav-panel" hidden aria-label="Saved favourites">
+      </section>
     </main>
 
     <noscript>

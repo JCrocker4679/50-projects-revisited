@@ -9,6 +9,7 @@
  * - renderHistoryNav() — history nav button states and counter
  * - showCopyFeedback() / setCopyButtonEnabled() / setShareButtonEnabled() — action buttons
  * - updateFavouriteButton() — favourite button state
+ * - updateFavouritesCount() / toggleFavouritesPanel() / renderFavouritesList() — favourites panel
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -23,6 +24,9 @@ import {
   setCopyButtonEnabled,
   setShareButtonEnabled,
   updateFavouriteButton,
+  updateFavouritesCount,
+  toggleFavouritesPanel,
+  renderFavouritesList,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -42,6 +46,12 @@ function setupDOM(): void {
         <span class="history-counter" aria-live="polite" hidden></span>
         <button id="nextBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Next joke">Next →</button>
       </nav>
+      <div class="fav-toggle-row">
+        <button id="favListBtn" class="btn btn--ghost" aria-expanded="false" aria-controls="favPanel">
+          My Favourites (<span id="favCount">0</span>)
+        </button>
+      </div>
+      <section id="favPanel" class="fav-panel" hidden aria-label="Saved favourites"></section>
     </div>
   `;
 }
@@ -408,5 +418,66 @@ describe('UI: updateFavouriteButton()', () => {
   it('does nothing if button element is missing', () => {
     document.getElementById('favouriteBtn')?.remove();
     expect(() => updateFavouriteButton(true)).not.toThrow();
+  });
+});
+
+describe('UI: updateFavouritesCount()', () => {
+  beforeEach(setupDOM);
+
+  it('updates the count text', () => {
+    updateFavouritesCount(5);
+    expect(document.getElementById('favCount')?.textContent).toBe('5');
+  });
+});
+
+describe('UI: toggleFavouritesPanel()', () => {
+  beforeEach(setupDOM);
+
+  it('shows panel when open=true', () => {
+    toggleFavouritesPanel(true);
+    expect((document.getElementById('favPanel') as HTMLElement).hidden).toBe(false);
+  });
+
+  it('hides panel when open=false', () => {
+    toggleFavouritesPanel(true);
+    toggleFavouritesPanel(false);
+    expect((document.getElementById('favPanel') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('updates aria-expanded on toggle button', () => {
+    toggleFavouritesPanel(true);
+    expect(document.getElementById('favListBtn')?.getAttribute('aria-expanded')).toBe('true');
+    toggleFavouritesPanel(false);
+    expect(document.getElementById('favListBtn')?.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('UI: renderFavouritesList()', () => {
+  beforeEach(setupDOM);
+
+  it('renders one item per joke', () => {
+    const jokes = [{ id: 'a', joke: 'Joke A' }, { id: 'b', joke: 'Joke B' }];
+    renderFavouritesList(jokes, vi.fn());
+    expect(document.querySelectorAll('.fav-item')).toHaveLength(2);
+  });
+
+  it('shows empty state when list is empty', () => {
+    renderFavouritesList([], vi.fn());
+    expect(document.querySelector('.fav-empty')).not.toBeNull();
+    expect(document.querySelector('.fav-list')).toBeNull();
+  });
+
+  it('calls onDelete with correct id when delete button clicked', () => {
+    const onDelete = vi.fn();
+    renderFavouritesList([{ id: 'x', joke: 'Joke X' }], onDelete);
+    (document.querySelector('.fav-item__delete') as HTMLButtonElement).click();
+    expect(onDelete).toHaveBeenCalledWith('x');
+  });
+
+  it('renders joke text as textContent (not innerHTML)', () => {
+    renderFavouritesList([{ id: '1', joke: '<script>alert(1)</script>' }], vi.fn());
+    const text = document.querySelector('.fav-item__text');
+    expect(text?.textContent).toBe('<script>alert(1)</script>');
+    expect(document.querySelector('script')).toBeNull();
   });
 });

@@ -14,6 +14,9 @@ import {
   setCopyButtonEnabled,
   setShareButtonEnabled,
   updateFavouriteButton,
+  updateFavouritesCount,
+  toggleFavouritesPanel,
+  renderFavouritesList,
 } from './ui.ts';
 import {
   getCurrentJoke,
@@ -24,6 +27,7 @@ import {
   getHistory,
   getHistoryIndex,
   initFavourites,
+  getFavourites,
   isFavourited,
   toggleFavourite,
 } from './state.ts';
@@ -42,11 +46,27 @@ const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
 const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
 const shareBtn = document.getElementById('shareBtn') as HTMLButtonElement | null;
 const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
+const favListBtn = document.getElementById('favListBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
+let favPanelOpen = false;
 
 function updateHistoryNav(): void {
   renderHistoryNav(getHistoryIndex(), getHistory().length);
+}
+
+function refreshFavouritesUI(): void {
+  const favs = getFavourites();
+  updateFavouritesCount(favs.length);
+  if (favPanelOpen) {
+    renderFavouritesList(favs, (id) => {
+      const joke = favs.find((j) => j.id === id);
+      if (joke) toggleFavourite(joke);
+      const current = getCurrentJoke();
+      if (current) updateFavouriteButton(isFavourited(current.id));
+      refreshFavouritesUI();
+    });
+  }
 }
 
 async function generateJoke(): Promise<void> {
@@ -136,6 +156,7 @@ function handleHistoryNav(direction: 'back' | 'forward'): void {
 // Seed state from localStorage
 initHistory();
 initFavourites();
+refreshFavouritesUI();
 
 // Wire up retry handler so the retry button in error state can trigger a new fetch
 setRetryHandler(() => {
@@ -154,6 +175,21 @@ favouriteBtn?.addEventListener('click', () => {
   if (!joke) return;
   toggleFavourite(joke);
   updateFavouriteButton(isFavourited(joke.id));
+  refreshFavouritesUI();
+});
+
+favListBtn?.addEventListener('click', () => {
+  favPanelOpen = !favPanelOpen;
+  toggleFavouritesPanel(favPanelOpen);
+  if (favPanelOpen) {
+    renderFavouritesList(getFavourites(), (id) => {
+      const joke = getFavourites().find((j) => j.id === id);
+      if (joke) toggleFavourite(joke);
+      const current = getCurrentJoke();
+      if (current) updateFavouriteButton(isFavourited(current.id));
+      refreshFavouritesUI();
+    });
+  }
 });
 
 // Load first joke immediately

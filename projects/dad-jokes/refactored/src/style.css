@@ -249,6 +249,114 @@ body {
   background-color: rgba(217, 119, 6, 0.08);
 }
 
+/* Ghost button variant */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid currentColor;
+  box-shadow: none;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+}
+
+.btn--ghost:hover {
+  background-color: transparent;
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+/* ===== History navigation ===== */
+.history-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn--nav {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.history-counter {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  min-width: 3rem;
+  text-align: center;
+}
+
+/* ===== Favourites panel ===== */
+.fav-toggle-row {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.fav-panel {
+  margin-top: 16px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.fav-empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.fav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fav-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.fav-item__text {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.fav-item__delete {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.fav-item__delete:hover {
+  color: var(--color-error);
+}
+
+.fav-item__delete:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 /* ===== Reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
   .btn,
@@ -277,122 +385,4 @@ body {
   .container {
     padding: 50px 40px;
   }
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Loading state — shimmer overlay */
-.joke--loading {
-  position: relative;
-  color: #999;
-}
-
-.joke--loading::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .joke--loading::after {
-    animation: none;
-    background: rgba(255, 255, 255, 0.4);
-  }
-}
-
-/* Error state */
-.joke--error {
-  color: #c0392b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.error-message {
-  display: block;
-}
-
-.retry-btn {
-  background-color: #c0392b;
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-  min-height: 44px;
-  min-width: 44px;
-  transition: background-color 0.15s ease;
-}
-
-.retry-btn:hover {
-  background-color: #a93226;
-}
-
-.retry-btn:focus-visible {
-  outline: 3px solid #2563eb;
-  outline-offset: 2px;
-}
-
-.fallback-label {
-  display: block;
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
-}
-
-.fallback-joke {
-  display: block;
-  font-size: 22px;
-  color: #333;
-  font-style: italic;
-}
-
-/* ===== History navigation ===== */
-.history-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.btn--nav {
-  padding: 10px 20px;
-  font-size: 0.875rem;
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.history-counter {
-  font-size: 0.875rem;
-  color: var(--color-text-muted, #555);
-  min-width: 3rem;
-  text-align: center;
 }
