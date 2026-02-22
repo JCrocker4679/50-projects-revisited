@@ -12,6 +12,7 @@ import {
   renderHistoryNav,
   showCopyFeedback,
   setCopyButtonEnabled,
+  setShareButtonEnabled,
   updateFavouriteButton,
 } from './ui.ts';
 import {
@@ -39,6 +40,7 @@ const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
 const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
 const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
 const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+const shareBtn = document.getElementById('shareBtn') as HTMLButtonElement | null;
 const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
@@ -49,6 +51,7 @@ function updateHistoryNav(): void {
 
 async function generateJoke(): Promise<void> {
   setCopyButtonEnabled(false);
+  setShareButtonEnabled(false);
   showLoading(isFirstLoad);
 
   try {
@@ -57,6 +60,7 @@ async function generateJoke(): Promise<void> {
     setCurrentJoke(joke);
     renderJoke(joke.joke);
     setCopyButtonEnabled(true);
+    setShareButtonEnabled(true);
     addToHistory(joke);
     updateHistoryNav();
     updateFavouriteButton(isFavourited(joke.id));
@@ -101,6 +105,27 @@ async function copyJoke(): Promise<void> {
   }
 }
 
+async function shareJoke(): Promise<void> {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+
+  const shareData = { text: joke.joke };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      // AbortError = user dismissed share sheet — not an error
+      if ((err as Error).name !== 'AbortError') {
+        await copyJoke();
+      }
+    }
+  } else {
+    // Desktop fallback: copy to clipboard
+    await copyJoke();
+  }
+}
+
 function handleHistoryNav(direction: 'back' | 'forward'): void {
   const joke = navigateHistory(direction);
   if (!joke) return;
@@ -122,6 +147,7 @@ jokeBtn?.addEventListener('click', generateJoke);
 prevBtn?.addEventListener('click', () => handleHistoryNav('back'));
 nextBtn?.addEventListener('click', () => handleHistoryNav('forward'));
 copyBtn?.addEventListener('click', copyJoke);
+shareBtn?.addEventListener('click', shareJoke);
 
 favouriteBtn?.addEventListener('click', () => {
   const joke = getCurrentJoke();

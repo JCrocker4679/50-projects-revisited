@@ -45,6 +45,7 @@ export function showCopyFeedback(success: boolean): void {
     btn.setAttribute('aria-label', 'Copy failed');
   }
 
+
   copyResetTimer = setTimeout(() => {
     btn.textContent = '📋';
     btn.setAttribute('aria-label', 'Copy joke to clipboard');
@@ -57,6 +58,11 @@ export function showCopyFeedback(success: boolean): void {
  */
 export function setCopyButtonEnabled(enabled: boolean): void {
   const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+  if (btn) btn.disabled = !enabled;
+}
+
+export function setShareButtonEnabled(enabled: boolean): void {
+  const btn = document.getElementById('shareBtn') as HTMLButtonElement | null;
   if (btn) btn.disabled = !enabled;
 }
 

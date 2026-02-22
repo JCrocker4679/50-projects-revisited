@@ -7,7 +7,7 @@
  * - showLoading() / hideLoading() toggle aria-busy and button state
  * - setRetryHandler() wires the retry callback
  * - renderHistoryNav() — history nav button states and counter
- * - showCopyFeedback() / setCopyButtonEnabled() — copy button behaviour
+ * - showCopyFeedback() / setCopyButtonEnabled() / setShareButtonEnabled() — action buttons
  * - updateFavouriteButton() — favourite button state
  */
 
@@ -21,6 +21,7 @@ import {
   renderHistoryNav,
   showCopyFeedback,
   setCopyButtonEnabled,
+  setShareButtonEnabled,
   updateFavouriteButton,
 } from '../ui.ts';
 
@@ -33,6 +34,7 @@ function setupDOM(): void {
       <div class="action-row">
         <button id="jokeBtn" class="btn">Get Another Joke</button>
         <button id="copyBtn" class="btn btn--icon" aria-label="Copy joke to clipboard" disabled>📋</button>
+        <button id="shareBtn" class="btn btn--icon" aria-label="Share joke" disabled>↗</button>
         <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
       </div>
       <nav class="history-nav" aria-label="Joke history navigation">
@@ -59,7 +61,6 @@ describe('UI: renderJoke()', () => {
     const malicious = '<img src=x onerror=alert(1)>';
     renderJoke(malicious);
     const jokeEl = document.getElementById('joke');
-    // textContent renders the string literally, not as HTML
     expect(jokeEl?.textContent).toBe(malicious);
     expect(jokeEl?.querySelector('img')).toBeNull();
   });
@@ -254,14 +255,14 @@ describe('UI: renderHistoryNav()', () => {
   beforeEach(setupDOM);
 
   it('disables prevBtn when at oldest joke (index === total - 1)', () => {
-    renderHistoryNav(4, 5); // index 4 = oldest in 5-item list
+    renderHistoryNav(4, 5);
     const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement;
     expect(prevBtn.disabled).toBe(true);
     expect(prevBtn.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('enables prevBtn when not at oldest', () => {
-    renderHistoryNav(0, 5); // index 0 = newest
+    renderHistoryNav(0, 5);
     const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement;
     expect(prevBtn.disabled).toBe(false);
   });
@@ -337,20 +338,29 @@ describe('UI: showCopyFeedback()', () => {
   });
 });
 
-describe('UI: setCopyButtonEnabled()', () => {
+describe('UI: setCopyButtonEnabled() / setShareButtonEnabled()', () => {
   beforeEach(setupDOM);
 
-  it('enables the copy button', () => {
+  it('enables copy button', () => {
     setCopyButtonEnabled(true);
-    const btn = document.getElementById('copyBtn') as HTMLButtonElement;
-    expect(btn.disabled).toBe(false);
+    expect((document.getElementById('copyBtn') as HTMLButtonElement).disabled).toBe(false);
   });
 
-  it('disables the copy button', () => {
+  it('disables copy button', () => {
     setCopyButtonEnabled(true);
     setCopyButtonEnabled(false);
-    const btn = document.getElementById('copyBtn') as HTMLButtonElement;
-    expect(btn.disabled).toBe(true);
+    expect((document.getElementById('copyBtn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('enables share button', () => {
+    setShareButtonEnabled(true);
+    expect((document.getElementById('shareBtn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('disables share button', () => {
+    setShareButtonEnabled(true);
+    setShareButtonEnabled(false);
+    expect((document.getElementById('shareBtn') as HTMLButtonElement).disabled).toBe(true);
   });
 });
 
