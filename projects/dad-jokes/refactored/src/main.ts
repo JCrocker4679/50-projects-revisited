@@ -8,27 +8,30 @@ import {
   showLoading,
   hideLoading,
   setRetryHandler,
+  showCopyFeedback,
+  setCopyButtonEnabled,
+  setShareButtonEnabled,
 } from './ui.ts';
-
-/**
- * Main entry point.
- *
- * Fetches a joke on page load and on button click.
- * Shows loading state during fetch, handles errors gracefully.
- * Caches last successful joke for fallback on error.
- */
+import { getCurrentJoke, setCurrentJoke } from './state.ts';
 
 const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement | null;
+const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+const shareBtn = document.getElementById('shareBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 
 async function generateJoke(): Promise<void> {
+  setCopyButtonEnabled(false);
+  setShareButtonEnabled(false);
   showLoading(isFirstLoad);
 
   try {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
+    setCurrentJoke(joke);
     renderJoke(joke.joke);
+    setCopyButtonEnabled(true);
+    setShareButtonEnabled(true);
   } catch (error) {
     const cached = lastJoke ?? undefined;
     if (error instanceof ApiError) {
@@ -42,10 +45,54 @@ async function generateJoke(): Promise<void> {
   }
 }
 
-// Wire up retry handler so the retry button in error state can trigger a new fetch
+async function copyJokeToClipboard(): Promise<void> {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+  try {
+    await navigator.clipboard.writeText(joke.joke);
+    showCopyFeedback(true);
+  } catch {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = joke.joke;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopyFeedback(true);
+    } catch {
+      showCopyFeedback(false);
+    }
+  }
+}
+
+async function shareJoke(): Promise<void> {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+
+  const shareData = { text: joke.joke };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      // AbortError = user dismissed share sheet — not an error
+      if ((err as Error).name !== 'AbortError') {
+        await copyJokeToClipboard();
+      }
+    }
+  } else {
+    // Desktop fallback: copy to clipboard
+    await copyJokeToClipboard();
+  }
+}
+
 setRetryHandler(generateJoke);
 
 jokeBtn?.addEventListener('click', generateJoke);
+copyBtn?.addEventListener('click', copyJokeToClipboard);
+shareBtn?.addEventListener('click', shareJoke);
 
-// Load first joke immediately
 generateJoke();

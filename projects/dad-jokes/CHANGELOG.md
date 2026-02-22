@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] — Sprint 2
+
+### Added
+- Share button (Web Share API on mobile; clipboard fallback on desktop); AbortError from dismissed share sheet handled silently
+
+---
+
+## [Sprint 1]
 
 ### Added
 - Vite + TypeScript project scaffold (`refactored/`)

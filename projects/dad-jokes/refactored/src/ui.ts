@@ -24,6 +24,32 @@ export function setRetryHandler(handler: () => void): void {
   retryHandler = handler;
 }
 
+const COPY_RESET_MS = 2000;
+let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+export function showCopyFeedback(success: boolean): void {
+  const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+  if (copyResetTimer) clearTimeout(copyResetTimer);
+  btn.textContent = success ? '✓' : '✗';
+  btn.setAttribute('aria-label', success ? 'Copied!' : 'Copy failed');
+  copyResetTimer = setTimeout(() => {
+    btn.textContent = '📋';
+    btn.setAttribute('aria-label', 'Copy joke to clipboard');
+    copyResetTimer = null;
+  }, COPY_RESET_MS);
+}
+
+export function setCopyButtonEnabled(enabled: boolean): void {
+  const btn = document.getElementById('copyBtn') as HTMLButtonElement | null;
+  if (btn) btn.disabled = !enabled;
+}
+
+export function setShareButtonEnabled(enabled: boolean): void {
+  const btn = document.getElementById('shareBtn') as HTMLButtonElement | null;
+  if (btn) btn.disabled = !enabled;
+}
+
 /**
  * Show loading state.
  * Disables button and adds aria-busy for screen readers.

@@ -8,13 +8,16 @@
  * - setRetryHandler() wires the retry callback
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   renderJoke,
   renderError,
   showLoading,
   hideLoading,
   setRetryHandler,
+  showCopyFeedback,
+  setCopyButtonEnabled,
+  setShareButtonEnabled,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -23,7 +26,11 @@ function setupDOM(): void {
     <div class="container">
       <h3>Don't Laugh Challenge</h3>
       <div class="joke" id="joke">// Joke goes here</div>
-      <button id="jokeBtn" class="btn">Get Another Joke</button>
+      <div class="action-row">
+        <button id="jokeBtn" class="btn">Get Another Joke</button>
+        <button id="copyBtn" class="btn btn--icon" aria-label="Copy joke to clipboard" disabled>📋</button>
+        <button id="shareBtn" class="btn btn--icon" aria-label="Share joke" disabled>↗</button>
+      </div>
     </div>
   `;
 }
@@ -233,5 +240,63 @@ describe('UI: hideLoading()', () => {
     hideLoading();
     const jokeBtn = document.getElementById('jokeBtn') as HTMLButtonElement;
     expect(jokeBtn.disabled).toBe(false);
+  });
+});
+
+describe('UI: showCopyFeedback()', () => {
+  beforeEach(() => { setupDOM(); vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('shows success icon and label', () => {
+    showCopyFeedback(true);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('✓');
+    expect(btn?.getAttribute('aria-label')).toBe('Copied!');
+  });
+
+  it('shows failure icon and label', () => {
+    showCopyFeedback(false);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('✗');
+    expect(btn?.getAttribute('aria-label')).toBe('Copy failed');
+  });
+
+  it('resets after 2s', () => {
+    showCopyFeedback(true);
+    vi.advanceTimersByTime(2000);
+    const btn = document.getElementById('copyBtn');
+    expect(btn?.textContent).toBe('📋');
+    expect(btn?.getAttribute('aria-label')).toBe('Copy joke to clipboard');
+  });
+
+  it('does not throw if button is missing', () => {
+    document.getElementById('copyBtn')?.remove();
+    expect(() => showCopyFeedback(true)).not.toThrow();
+  });
+});
+
+describe('UI: setCopyButtonEnabled() / setShareButtonEnabled()', () => {
+  beforeEach(setupDOM);
+
+  it('enables copy button', () => {
+    setCopyButtonEnabled(true);
+    expect((document.getElementById('copyBtn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('disables copy button', () => {
+    setCopyButtonEnabled(true);
+    setCopyButtonEnabled(false);
+    expect((document.getElementById('copyBtn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('enables share button', () => {
+    setShareButtonEnabled(true);
+    expect((document.getElementById('shareBtn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('disables share button', () => {
+    setShareButtonEnabled(true);
+    setShareButtonEnabled(false);
+    expect((document.getElementById('shareBtn') as HTMLButtonElement).disabled).toBe(true);
   });
 });
