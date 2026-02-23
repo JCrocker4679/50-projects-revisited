@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Sprint 3] — 2026-02-23
 
-### Sprint 3 in progress — entries added per ticket
+### Added
+
+- **Dark mode palette** (`[data-theme="dark"]`): warm dark colour overrides using CSS custom properties. All WCAG AA contrast ratios verified (text 13.81:1, muted 5.74:1, error 5.83:1 on dark card background)
+- `--color-rating-up` / `--color-rating-down` CSS custom properties for rating buttons (#65) — in both light and dark themes
+- `.rating-btn--up-active` / `.rating-btn--down-active` CSS classes for active rating button states
+- Smooth theme transition: `background-color` and `color` transitions on `body` and `.container` (disabled for `prefers-reduced-motion`)
+
+### Fixed
+
+- `--color-shimmer` custom property replaces hardcoded `rgba(255,255,255,0.6)` in shimmer animation — fixes white flash in dark mode
+- `--color-divider` custom property replaces hardcoded `#eee` / `#f0f0f0` borders in `.fav-panel` and `.fav-item`
+- `.joke--loading` text colour now uses `var(--color-text-muted)` instead of hardcoded `#999`
+- `.retry-btn` text uses `var(--color-card)` instead of hardcoded `#fff` (correct in dark mode)
 
 ---
 

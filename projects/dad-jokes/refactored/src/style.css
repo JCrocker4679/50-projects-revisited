@@ -17,9 +17,17 @@
  * - Icon button variant (btn--icon)
  * - Joke text crossfade on change
  * - Button copy: "Tell me another"
+ *
+ * Sprint 3 dark mode (#67):
+ * - [data-theme="dark"] palette overrides (warm dark, not cold grey)
+ * - All WCAG AA verified (see contrast audit in spike-search-findings)
+ * - --color-shimmer custom property (fixes white flash in dark mode)
+ * - --color-divider custom property (fixes hardcoded #eee borders)
+ * - --color-rating-up / --color-rating-down for rating buttons (#65)
+ * - body/container theme transition for smooth toggle
  */
 
-/* ===== Custom Properties ===== */
+/* ===== Custom Properties — Light theme (default) ===== */
 :root {
   --color-bg: #FFF8E7;
   --color-card: #FFFFFF;
@@ -32,12 +40,41 @@
   --color-error: #DC2626;
   --color-error-hover: #B91C1C;
   --color-star-active: #D97706;
+  --color-rating-up: #059669;
+  --color-rating-down: #DC2626;
+  --color-divider: #eeeeee;
+  --color-shimmer: rgba(255, 255, 255, 0.6);
 
   --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.08), 0 6px 6px rgba(0, 0, 0, 0.06);
   --shadow-btn: 0 4px 12px rgba(217, 119, 6, 0.25);
 
   --radius-card: 12px;
   --radius-btn: 10px;
+}
+
+/* ===== Dark theme overrides ===== */
+/* Applied by setting data-theme="dark" on <html>.
+   All values WCAG AA verified (≥ 4.5:1 for text, ≥ 3:1 for UI components).
+   Warm dark palette to match the amber/cream light theme. */
+[data-theme="dark"] {
+  --color-bg: #1C1814;
+  --color-card: #262017;
+  --color-text: #F5EDD6;        /* 13.81:1 on card — ✅ */
+  --color-text-muted: #A89880;  /*  5.74:1 on card — ✅ */
+  --color-btn: #D97706;         /*  5.07:1 on card — ✅ (UI component) */
+  --color-btn-hover: #F59E0B;
+  --color-btn-text: #1C1814;    /*  5.54:1 on amber — ✅ */
+  --color-focus: #60A5FA;       /*  6.94:1 on bg — ✅ */
+  --color-error: #F87171;       /*  5.83:1 on card — ✅ */
+  --color-error-hover: #FCA5A5;
+  --color-star-active: #F59E0B;
+  --color-rating-up: #34D399;   /*  8.39:1 on card — ✅ */
+  --color-rating-down: #F87171; /*  5.83:1 on card — ✅ */
+  --color-divider: #2C2820;
+  --color-shimmer: rgba(255, 255, 255, 0.05);
+
+  --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.3);
+  --shadow-btn: 0 4px 12px rgba(217, 119, 6, 0.4);
 }
 
 /* ===== Reset ===== */
@@ -58,6 +95,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 24px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ===== Container (card) ===== */
@@ -69,6 +107,7 @@ body {
   text-align: center;
   max-width: 100%;
   width: 800px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* ===== Title ===== */
@@ -95,7 +134,7 @@ body {
 
 .joke--loading {
   position: relative;
-  color: #999;
+  color: var(--color-text-muted);
   opacity: 0.6;
 }
 
@@ -106,7 +145,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
+    var(--color-shimmer) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -136,7 +175,7 @@ body {
 
 .retry-btn {
   background-color: var(--color-error);
-  color: #fff;
+  color: var(--color-card);
   border: 0;
   border-radius: 6px;
   padding: 10px 24px;
@@ -249,6 +288,19 @@ body {
   background-color: rgba(217, 119, 6, 0.08);
 }
 
+/* Rating button active states */
+.btn--icon.rating-btn--up-active {
+  color: var(--color-rating-up);
+  border-color: var(--color-rating-up);
+  background-color: rgba(5, 150, 105, 0.08);
+}
+
+.btn--icon.rating-btn--down-active {
+  color: var(--color-rating-down);
+  border-color: var(--color-rating-down);
+  background-color: rgba(220, 38, 38, 0.08);
+}
+
 /* Ghost button variant */
 .btn--ghost {
   background-color: transparent;
@@ -297,7 +349,7 @@ body {
 
 .fav-panel {
   margin-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-divider);
   padding-top: 16px;
   max-height: 320px;
   overflow-y: auto;
@@ -325,7 +377,7 @@ body {
   align-items: flex-start;
   gap: 12px;
   padding: 10px 4px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .fav-item__text {
@@ -359,6 +411,8 @@ body {
 
 /* ===== Reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
+  body,
+  .container,
   .btn,
   .btn--icon,
   .retry-btn,
@@ -372,7 +426,7 @@ body {
 
   .joke--loading::after {
     animation: none;
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--color-shimmer);
   }
 }
 
