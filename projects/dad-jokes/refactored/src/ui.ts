@@ -148,10 +148,13 @@ export function updateFavouriteButton(favourited: boolean): void {
 
 /**
  * Update the count badge in the favourites toggle button.
+ * Hides the toggle row when count is 0 (D-VD4).
  */
 export function updateFavouritesCount(count: number): void {
   const el = document.getElementById('favCount');
   if (el) el.textContent = String(count);
+  const row = document.querySelector('.fav-toggle-row') as HTMLElement | null;
+  if (row) row.hidden = count === 0;
 }
 
 /**
