@@ -321,10 +321,21 @@ body {
 .history-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 16px;
   margin-top: 16px;
-  flex-wrap: wrap;
+}
+
+.history-nav__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.history-nav__rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn--nav {
