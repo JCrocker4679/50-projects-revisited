@@ -27,8 +27,19 @@
 
     <!-- Theme colour for mobile browsers -->
     <meta name="theme-color" content="#686de0" />
+
+    <!-- Theme init: applies saved/system preference before paint to prevent FOUC.
+         Must be in <head>. Module script is CSP-compliant (no inline scripts). -->
+    <script type="module" src="/src/theme-init.ts"></script>
   </head>
   <body>
+    <button
+      id="themeToggleBtn"
+      class="theme-toggle"
+      type="button"
+      aria-label="Switch to dark mode"
+      aria-pressed="false"
+    >☾</button>
     <main class="container" role="main">
       <h1 class="title">Don't Laugh Challenge</h1>
       <p

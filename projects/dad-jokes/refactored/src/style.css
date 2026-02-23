@@ -420,6 +420,41 @@ body {
   outline-offset: 2px;
 }
 
+/* ===== Dark mode toggle button ===== */
+/* Fixed top-right: conventional placement, doesn't interfere with the card */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 50%;
+  background-color: var(--color-card);
+  color: var(--color-text-muted);
+  border: 2px solid var(--color-divider);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.theme-toggle:hover {
+  color: var(--color-btn);
+  border-color: var(--color-btn);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 /* ===== Reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
   body,
@@ -427,7 +462,8 @@ body {
   .btn,
   .btn--icon,
   .retry-btn,
-  .joke {
+  .joke,
+  .theme-toggle {
     transition: none;
   }
 
