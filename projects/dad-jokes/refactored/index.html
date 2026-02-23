@@ -48,15 +48,42 @@
         aria-live="polite"
         aria-atomic="true"
       >Loading...</p>
-      <div class="action-row">
+      <div class="cta-row">
         <button id="jokeBtn" class="btn" type="button">
           Tell me another
         </button>
+      </div>
+      <div class="icon-row">
+        <button
+          id="favouriteBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-pressed="false"
+          aria-label="Add to favourites"
+          title="Add to favourites"
+        >★</button>
+        <button
+          id="thumbsDownBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-label="Rate joke down"
+          aria-pressed="false"
+          title="Rate joke down"
+        >👎</button>
+        <button
+          id="thumbsUpBtn"
+          class="btn btn--icon"
+          type="button"
+          aria-label="Rate joke up"
+          aria-pressed="false"
+          title="Rate joke up"
+        >👍</button>
         <button
           id="copyBtn"
           class="btn btn--icon"
           type="button"
           aria-label="Copy joke to clipboard"
+          title="Copy joke to clipboard"
           disabled
         >📋</button>
         <button
@@ -64,56 +91,30 @@
           class="btn btn--icon"
           type="button"
           aria-label="Share joke"
+          title="Share joke"
           disabled
         >↗</button>
-        <button
-          id="favouriteBtn"
-          class="btn btn--icon"
-          type="button"
-          aria-pressed="false"
-          aria-label="Add to favourites"
-        >★</button>
       </div>
       <nav class="history-nav" aria-label="Joke history navigation">
-        <div class="history-nav__left">
-          <button
-            id="prevBtn"
-            class="btn btn--nav"
-            type="button"
-            aria-label="Previous joke"
-            aria-disabled="true"
-            disabled
-          >← Prev</button>
-          <span class="history-counter" aria-live="polite" hidden></span>
-          <button
-            id="nextBtn"
-            class="btn btn--nav"
-            type="button"
-            aria-label="Next joke"
-            aria-disabled="true"
-            disabled
-          >Next →</button>
-        </div>
-        <div class="history-nav__rating">
-          <button
-            id="thumbsDownBtn"
-            class="btn btn--icon"
-            type="button"
-            aria-label="Rate joke down"
-            aria-pressed="false"
-            title="Rate joke down"
-          >👎</button>
-          <button
-            id="thumbsUpBtn"
-            class="btn btn--icon"
-            type="button"
-            aria-label="Rate joke up"
-            aria-pressed="false"
-            title="Rate joke up"
-          >👍</button>
-        </div>
+        <button
+          id="prevBtn"
+          class="btn btn--nav"
+          type="button"
+          aria-label="Previous joke"
+          aria-disabled="true"
+          disabled
+        >← Prev</button>
+        <span class="history-counter" aria-live="polite" hidden></span>
+        <button
+          id="nextBtn"
+          class="btn btn--nav"
+          type="button"
+          aria-label="Next joke"
+          aria-disabled="true"
+          disabled
+        >Next →</button>
       </nav>
-      <div class="fav-toggle-row">
+      <div class="fav-toggle-row" hidden>
         <button
           id="favListBtn"
           class="btn btn--ghost"

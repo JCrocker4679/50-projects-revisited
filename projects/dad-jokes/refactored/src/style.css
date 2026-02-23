@@ -210,13 +210,21 @@ body {
   font-style: italic;
 }
 
-/* ===== Action row ===== */
-.action-row {
+/* ===== CTA row (primary action only) ===== */
+.cta-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* ===== Icon row (secondary actions) ===== */
+.icon-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 16px;
 }
 
 /* ===== Primary button ===== */
@@ -255,7 +263,7 @@ body {
   cursor: not-allowed;
 }
 
-/* Icon button variant — square, same height as primary btn */
+/* Icon button variant — ghost style: no visible border until hover/active */
 .btn--icon {
   padding: 0;
   width: 48px;
@@ -265,7 +273,7 @@ body {
   border-radius: var(--radius-btn);
   background-color: transparent;
   color: var(--color-text-muted);
-  border: 2px solid currentColor;
+  border: 2px solid transparent;
   box-shadow: none;
   transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
@@ -324,18 +332,6 @@ body {
   justify-content: space-between;
   gap: 16px;
   margin-top: 16px;
-}
-
-.history-nav__left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.history-nav__rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .btn--nav {
