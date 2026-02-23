@@ -43,7 +43,8 @@ We use GitHub Issues, branches, and PRs to manage work — just like a real team
 | Command | Purpose |
 |---------|---------|
 | `/sprint-plan` | Break a phase into a sprint — reads DECISIONS.md Sprint Brief, creates epic, user stories, and tasks as GitHub issues |
-| `/sprint-run` | Execute an entire sprint — works through every ticket in dependency order, one branch + PR per ticket. You come back to a stack of PRs to review |
+| `/sprint-run` | Start a sprint — maps all tickets into dependency waves, executes Wave 1, then stops for merges |
+| `/sprint-resume` | Continue a sprint after merging — detects where you are, executes the next wave, stops again. Repeat until done |
 | `/work-ticket` | Pick up a single ticket manually — creates branch, does the work, commits, opens a PR. Use this if you want to cherry-pick one ticket rather than run the whole sprint |
 | `/sprint-review` | End-of-sprint review and retro — what shipped, what didn't, what we learned, reprioritise for next sprint |
 
@@ -70,7 +71,7 @@ Commands for turning project work into blog posts and videos. Note: `/content-ex
 3. **Decisions** — Synthesise reviews into concrete decisions and a Sprint Brief (`/product-decisions`). This is where scope gets set and disagreements get resolved
 4. **Baseline tests** — Write tests that lock down the current behaviour BEFORE changing anything (`/write-baseline-tests`). Prerequisite for all refactoring
 5. **Sprint plan** — Break the Sprint Brief into tickets on GitHub (`/sprint-plan`). Only plans work that's in scope per DECISIONS.md
-6. **Build** — Run the sprint (`/sprint-run`) to work through all tickets automatically — branch per ticket, PR per ticket. Or use `/work-ticket` to cherry-pick individual tickets. Tests must pass before any PR is opened
+6. **Build** — Start with `/sprint-run`, which maps all tickets into waves and builds Wave 1. Merge those PRs, then `/sprint-resume` to build the next wave. Repeat until all waves are done. Or use `/work-ticket` to handle a single ticket manually. Tests must pass before any PR is opened
 7. **Sprint review** — Review what shipped, retro, reprioritise (`/sprint-review`). Feed learnings back into decisions for next sprint
 8. **Log** — Capture the session for content (`/session-log`)
 9. **Content** — Plan and produce blog/video content (`/content-plan`, `/content-review`)
