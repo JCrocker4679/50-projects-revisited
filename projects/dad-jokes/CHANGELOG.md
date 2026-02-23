@@ -2,20 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] — Sprint 2
+## [Sprint 2] — 2026-02-22
 
 ### Added
-- Share button (Web Share API on mobile; clipboard fallback on desktop); AbortError from dismissed share sheet handled silently
-- History navigation: back/forward buttons to browse previously seen jokes; position counter ("2 / 8"); persists across page reloads
-- Copy joke to clipboard button; shows "✓ Copied!" feedback for 2s, resets automatically; falls back to `execCommand` on older browsers
-- Visual refresh: warm amber/cream colour palette replacing tutorial purple; action row layout for secondary buttons; icon button variant (`btn--icon`) with hover/active states
-- Favourites: star/unstar jokes with localStorage persistence (`dad-jokes-favourites-v1`); star button in action row with `aria-pressed` support
-- Joke history: stores last 50 jokes in localStorage (`dad-jokes-history-v1`); `navigateHistory()` for back/forward traversal
-- Vercel Analytics: page-view tracking via `inject()` on load; custom events for `joke_fetched`, `error_shown`, `retry_clicked`, `joke_copied`, `joke_shared`, `favourite_added`, `favourite_removed`, `history_navigated`
-- `src/analytics.ts` — typed analytics wrapper with `safeTrack()` so analytics failures never reach the user
-- OG image: real 1200×630 PNG replacing placeholder, for proper social sharing previews
+
+- **Favourites list view**: panel showing saved jokes with delete buttons; empty state when list is empty; toggle button with live count badge (`My Favourites (3)`)
+- **Favourites**: star/unstar jokes from the action row; persisted to `localStorage` (`dad-jokes-favourites-v1`); max 100 saved; `aria-pressed` on star button
+- **Web Share API**: share button uses native share sheet on mobile; falls back to clipboard copy on desktop; dismissed share sheet handled silently
+- **Copy to clipboard**: copy button with 2s "✓ Copied!" feedback that resets automatically; falls back to `execCommand` on older browsers
+- **History navigation**: back/forward buttons to browse previously seen jokes; position counter ("2 / 8"); history persists across page reloads (`dad-jokes-history-v1`); max 50 entries
+- **Visual refresh**: warm amber/cream colour palette replacing tutorial purple; action row layout for icon buttons; `btn--icon` and `btn--ghost` CSS variants; joke text crossfade on load
+- **Vercel Analytics**: page-view tracking via `inject()` on load; custom typed events for `joke_fetched`, `error_shown`, `retry_clicked`, `joke_copied`, `joke_shared`, `favourite_added`, `favourite_removed`, `history_navigated`; `safeTrack()` wrapper so analytics failures never reach users
+- **OG image**: real 1200×630 PNG replacing placeholder SVG, for correct social sharing previews
+- `src/analytics.ts` — typed Vercel Analytics wrapper module
 
 ### Changed
+
 - Main button label: "Get Another Joke" → "Tell me another"
 - Joke text fade on load (CSS opacity transition, respects `prefers-reduced-motion`)
 - Error colours now use CSS custom properties (no more hardcoded hex in error styles)
@@ -25,39 +27,27 @@ All notable changes to this project will be documented in this file.
 
 ## [Sprint 1] — 2026-02-19
 
-### Sprint 2 — Ticket #37: Favourites list view
-
-#### Added
-- `renderFavouritesList()` in `ui.ts` — renders saved jokes as DOM list with delete buttons; shows empty state when list is empty
-- `updateFavouriteButton()` — syncs star button aria-pressed, aria-label, and active CSS class
-- `updateFavouritesCount()` — updates the count badge in the panel toggle button
-- `toggleFavouritesPanel()` — shows/hides favourites panel with aria-expanded sync
-- Favourites panel (`#favPanel`) in index.html with toggle button and count badge
-- Star button (`#favouriteBtn`) alongside the main joke button in an action row
-- Panel, item, and icon button CSS (`.fav-panel`, `.fav-list`, `.fav-item`, `.btn--icon`, `.btn--ghost`)
-- 16 new UI tests covering all four new UI functions, including XSS-safety check
-
-#### Changed
-- `AppState` extended with `favourites: Joke[]`
-- `storage.ts` extended with `loadFavourites` / `saveFavourites`
-- `state.ts` extended with `initFavourites`, `getFavourites`, `isFavourited`, `toggleFavourite` (max 100, newest-first)
-- `main.ts` wires star button, panel toggle, and delete callbacks; calls `initFavourites()` on load
-
 ### Added
+
 - Vite + TypeScript project scaffold (`refactored/`)
 - Module structure: `api.ts`, `ui.ts`, `state.ts`, `storage.ts`, `types.ts`, `constants.ts`
+- Resilient API layer: typed `ApiError` class, `AbortController` timeout, HTTP status checking, response shape validation
+- Error UI: user-friendly messages per error type (network, HTTP, timeout, validation); retry button; cached joke fallback
+- Loading state: shimmer animation via CSS, `aria-busy` for screen readers
+- Accessibility: semantic HTML, WCAG AA contrast, 44×44px touch targets, visible focus styles, `aria-live` on joke text
+- Responsive layout: mobile-first, fluid typography via `clamp()`, desktop breakpoint at 640px
+- Meta tags: `<title>`, `<meta description>`, Open Graph, Twitter Card, favicon, theme-color
+- Content Security Policy meta tag (strict: `default-src 'self'`)
+- Baseline tests: Vitest + MSW test infrastructure; tests for `api.ts`, `ui.ts`, `state.ts`, `storage.ts`
 - Self-hosted Roboto font via @fontsource (latin subset, weights 400 + 700)
-- Vitest + MSW test infrastructure
+- Vercel deployment: `dad-jokes-revisited.vercel.app`
 
 ### Changed
-- Original 20-line `script.js` decomposed into typed modules
-- Google Fonts `@import` replaced with self-hosted @fontsource
-- Font weight 400 added (original only loaded 700, causing all text to render bold)
 
-### Migration Notes
-The code migration preserves exact original behaviour:
-- `api.ts` → fetch call with `Accept: application/json` header
-- `ui.ts` → DOM update via `innerHTML` (intentionally kept for now — security fix in #6)
-- `main.ts` → event listener + initial call on page load
-- HTML structure identical to original
-- CSS identical (minus `@import url()` for Google Fonts)
+- Original 20-line `script.js` decomposed into typed, tested modules
+- `innerHTML` → `textContent` / DOM methods throughout (XSS prevention)
+- Google Fonts `@import` → self-hosted @fontsource (eliminates third-party font request)
+- Font weight 400 added (original only loaded 700, all text rendered bold)
+- Duplicate `.btn:disabled` rule removed from CSS
+- `overflow: hidden` removed from body (was clipping content on small viewports)
+- Focus styles: `outline: 0` replaced with `3px solid #2563eb` visible outline
