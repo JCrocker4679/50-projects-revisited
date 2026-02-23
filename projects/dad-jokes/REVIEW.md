@@ -92,21 +92,21 @@ All 14 tickets shipped. See `sprints/sprint-1-review.md` for full retro.
 11. ✅ Bonus: Content Security Policy
 12. ✅ Bonus: Vercel deployment config with security headers
 
-### Phase 2 — Make it useful 📋 NEXT (Sprint 2)
-Revised based on Sprint 1 learnings. Priority order:
+### Phase 2 — Make it useful ✅ COMPLETE (Sprint 2, 2026-02-23)
+All 12 tickets shipped. See `sprints/phase-2-review.md` for full retro.
 
-1. OG image (PNG 1200×630) — small thing, high polish impact *(carry-over from Sprint 1)*
-2. Joke history — localStorage array, back/forward navigation
-3. Copy to clipboard — Clipboard API
-4. Favourites — star/unstar with localStorage persistence
-5. Favourites list view
-6. Web Share API with clipboard fallback
-7. Search by keyword — uses API's search endpoint
-8. Analytics events — Vercel Analytics (joke_fetched, error, retry, favourite_added)
-9. Visual refresh — new colour palette (keep structure, update feel)
-10. E2E test: happy path with Playwright
+1. ✅ OG image (PNG 1200×630) — carry-over from Sprint 1
+2. ✅ Joke history — localStorage array, back/forward navigation, position counter
+3. ✅ Copy to clipboard — Clipboard API with 2s feedback
+4. ✅ Favourites — star/unstar with localStorage persistence (max 100)
+5. ✅ Favourites list view — browse and delete; live count badge; empty state
+6. ✅ Web Share API with clipboard fallback
+7. ✅ Analytics events — 8 typed events, `safeTrack()` wrapper
+8. ✅ Visual refresh — warm amber/cream palette, action row, icon buttons, crossfade
+9. ✅ Tests — 131 tests, 100% line coverage
+10. ✅ Deployed and verified live
 
-**Dropped from original Phase 2:** "Responsive design polish" — already done in Sprint 1.
+**Dropped from original Phase 2:** "Search by keyword" (pushed to Sprint 3), "E2E tests with Playwright" (pushed to Sprint 3).
 
 ### Phase 3 — Make it impressive 🔮 FUTURE
 *Sequencing revised — build tooling, tests, and deploy moved to Sprint 1 where they belonged.*
@@ -128,6 +128,8 @@ Revised based on Sprint 1 learnings. Priority order:
 | Claude Opus 4.6 | 8 expert agent reviews + decisions | Full team-review + product-decisions workflow |
 | Claude Opus 4.6 | Sprint 1 planning (15 issues) | /sprint-plan — accurate, well-sequenced |
 | Claude Opus 4.6 | Sprint 1 execution (13 PRs) | /sprint-run — autonomous, 14/14 tickets completed |
+| Claude Sonnet 4.6 | Sprint 2 planning (12 issues) | /sprint-plan — clean dependency graph, well-scoped |
+| Claude Sonnet 4.6 | Sprint 2 execution (12 PRs) | /sprint-run → manual conflict resolution → /sprint-resume — 12/12 tickets completed |
 
 ## Learnings
 
@@ -141,3 +143,10 @@ Revised based on Sprint 1 learnings. Priority order:
 - CSS custom properties + clamp() + focus-visible + prefers-reduced-motion should be defaults in all projects going forward.
 - The AI naturally wrote for Sprint 2 (CSS custom properties as theming groundwork) without being told to. This is the right instinct.
 - Context loss between sessions is the primary operational risk for long sprint-runs. Mitigate with branch checkpointing.
+
+**Sprint 2 (2026-02-23):**
+- Autonomous sprint-run without mid-wave merges causes merge conflicts when multiple tickets touch the same files (ui.ts, style.css). Fix: stop after each ticket, merge, continue.
+- Sprint planning has no specialist review step — UX decisions in ticket descriptions get made implicitly by the executing agent, not a specialist. Worth adding a UX review pass between /sprint-plan and /sprint-run.
+- Truly independent tickets (different files, no shared state) could run in parallel sub-agents — but current tooling makes this a manual orchestration step (two terminal sessions), not automated.
+- `safeTrack()` wrapper for analytics and typed event maps are patterns worth templating for all future projects.
+- CSS custom properties investment in Sprint 1 paid off in Sprint 2 — dark mode in Sprint 3 will be similarly cheap because of Sprint 2's palette work.

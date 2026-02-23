@@ -43,8 +43,9 @@ We use GitHub Issues, branches, and PRs to manage work — just like a real team
 | Command | Purpose |
 |---------|---------|
 | `/sprint-plan` | Break a phase into a sprint — reads DECISIONS.md Sprint Brief, creates epic, user stories, and tasks as GitHub issues |
-| `/sprint-run` | Start a sprint — maps all tickets into dependency waves, executes Wave 1, then stops for merges |
-| `/sprint-resume` | Continue a sprint after merging — detects where you are, executes the next wave, stops again. Repeat until done |
+| `/sprint-plan-review` | Specialist review of a sprint plan before execution — UX and QA agents review the proposed tickets, surface implicit design decisions, and write them into ticket descriptions. Run this after `/sprint-plan` and before `/sprint-run` for any sprint with new UI surfaces |
+| `/sprint-run` | Start a sprint — maps all tickets into dependency tiers, executes one ticket at a time, stops for a merge after each PR. Repeat with `/sprint-resume` until done |
+| `/sprint-resume` | Continue a sprint after merging — picks up the next unstarted ticket, executes it, stops for merge. Repeat until all tickets are done |
 | `/work-ticket` | Pick up a single ticket manually — creates branch, does the work, commits, opens a PR. Use this if you want to cherry-pick one ticket rather than run the whole sprint |
 | `/sprint-review` | End-of-sprint review and retro — what shipped, what didn't, what we learned, reprioritise for next sprint |
 
@@ -71,13 +72,14 @@ Commands for turning project work into blog posts and videos. Note: `/content-ex
 3. **Decisions** — Synthesise reviews into concrete decisions and a Sprint Brief (`/product-decisions`). This is where scope gets set and disagreements get resolved
 4. **Baseline tests** — Write tests that lock down the current behaviour BEFORE changing anything (`/write-baseline-tests`). Prerequisite for all refactoring
 5. **Sprint plan** — Break the Sprint Brief into tickets on GitHub (`/sprint-plan`). Only plans work that's in scope per DECISIONS.md
-6. **Build** — Start with `/sprint-run`, which maps all tickets into waves and builds Wave 1. Merge those PRs, then `/sprint-resume` to build the next wave. Repeat until all waves are done. Or use `/work-ticket` to handle a single ticket manually. Tests must pass before any PR is opened
-7. **Sprint review** — Review what shipped, retro, reprioritise (`/sprint-review`). Feed learnings back into decisions for next sprint
-8. **Log** — Capture the session for content (`/session-log`)
-9. **Content** — Plan and produce blog/video content (`/content-plan`, `/content-review`)
-10. **Next** — Figure out what's next (`/content-next`, then back to step 3 for next sprint — decisions may change based on what we learned)
-11. **Project retrospective** — When the project is done, run `/project-retrospective` for a full review of outcomes, agent performance, and process improvements
-12. **Extract learnings** — Run `/content-extract` to identify teachable moments for the blog/video series
+6. **Plan review** — For sprints with new UI surfaces or interaction patterns, run `/sprint-plan-review` to get specialist (UX, QA) eyes on the plan before any code is written. Implicit design decisions get made explicit and written into ticket descriptions
+7. **Build** — Run `/sprint-run`, which executes one ticket at a time and stops for a merge after each PR. Run `/sprint-resume` after each merge to continue. Or use `/work-ticket` to handle a single ticket manually. Tests must pass before any PR is opened
+8. **Sprint review** — Review what shipped, retro, reprioritise (`/sprint-review`). Feed learnings back into decisions for next sprint
+9. **Log** — Capture the session for content (`/session-log`)
+10. **Content** — Plan and produce blog/video content (`/content-plan`, `/content-review`)
+11. **Next** — Figure out what's next (`/content-next`, then back to step 3 for next sprint — decisions may change based on what we learned)
+12. **Project retrospective** — When the project is done, run `/project-retrospective` for a full review of outcomes, agent performance, and process improvements
+13. **Extract learnings** — Run `/content-extract` to identify teachable moments for the blog/video series
 
 ### Code standards
 - Accessibility is not optional — WCAG AA minimum
@@ -90,9 +92,15 @@ Commands for turning project work into blog posts and videos. Note: `/content-ex
 ### GitHub workflow
 - Repo lives on JCrocker4679 account
 - All work happens on feature branches, never directly on main
-- One branch per ticket, one PR per ticket
+- One branch per ticket, one PR per ticket — each branch cuts from `main` after the previous PR is merged
 - PRs reference their issue ("Closes #12")
 - Claude Code creates issues, branches, and PRs via `gh` CLI — Joe reviews and merges
+- **Merge before continuing:** After each PR is opened, stop and wait for Joe to merge before starting the next ticket. This prevents merge conflicts from multiple branches touching the same files
+
+### Ticket parallelism
+Some tickets are `parallel-safe` — they touch entirely different files and can run in separate terminal sessions simultaneously. These are labelled `parallel-safe` in GitHub. To run them in parallel: open two Claude Code sessions and run `/work-ticket` on one ticket in each session. Merge both PRs before starting any ticket that depends on either.
+
+Tickets are NOT parallel-safe if they touch the same files (e.g. both modify `ui.ts` or `style.css`). When in doubt, run sequentially.
 
 ### Capturing learnings
 After each significant piece of work, update:

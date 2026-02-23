@@ -64,6 +64,7 @@ Tracking is done entirely with **GitHub Issues + labels + milestones** — which
 - Which expert agent is best suited to work on it (e.g. "frontend", "backend", "qa")
 - Estimated complexity (S/M/L)
 - Dependencies (which tickets need to be done first)
+- **`parallel-safe` label** if the ticket touches entirely different files from all other open tickets (e.g. different module, different CSS section, no shared state). Do NOT mark parallel-safe if there's any chance of file overlap — when in doubt, omit it
 
 **Watch for ghost tickets:** If a ticket's work will obviously be absorbed into another (e.g. a migration ticket whose scope is fully covered by the scaffold ticket), flag it explicitly in the plan rather than creating a separate issue that will produce an empty PR. Either merge the tickets or note upfront: "This will be done as part of #{other-ticket}, no separate PR needed."
 
@@ -84,6 +85,7 @@ gh label create bug --color D73A4A
 gh label create test --color BFD4F2
 gh label create docs --color 0075CA
 gh label create phase-1 --color C5DEF5
+gh label create parallel-safe --description "Can run concurrently in separate sessions — touches no shared files" --color 0E8A16
 ```
 (Adjust phase label number as needed. Skip any that already exist.)
 
@@ -119,3 +121,9 @@ Write the full sprint plan to `projects/{project-name}/sprints/phase-{n}-plan.md
 - Anything explicitly pushed to a future sprint and why
 
 Prioritise ruthlessly. Not everything from the phase plan needs to happen — focus on what delivers the most value. Flag anything you'd push to the next sprint.
+
+## After planning
+
+At the end of the plan output, remind the user:
+
+> **Next step:** If this sprint includes new UI surfaces or interaction patterns, run `/sprint-plan-review {project-name} {n}` before executing. This gives UX and QA specialists a chance to surface implicit design decisions before any code is written. Then run `/sprint-run {project-name} {n}` to start execution.
