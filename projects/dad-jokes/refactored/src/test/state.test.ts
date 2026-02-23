@@ -7,6 +7,7 @@
  * - setError / getError
  * - getFavourites / isFavourited / toggleFavourite
  * - addToHistory / getHistory / navigateHistory / isAtHistoryStart / isAtHistoryEnd
+ * - initRatings / getRating / setRating
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -28,6 +29,9 @@ import {
   isAtHistoryStart,
   isAtHistoryEnd,
   initHistory,
+  initRatings,
+  getRating,
+  setRating,
 } from '../state.ts';
 
 // Mock storage so state tests don't depend on localStorage
@@ -36,6 +40,8 @@ vi.mock('../storage.ts', () => ({
   saveFavourites: vi.fn(),
   loadHistory: () => [],
   saveHistory: vi.fn(),
+  loadRatings: () => ({}),
+  saveRatings: vi.fn(),
 }));
 
 describe('State: currentJoke', () => {
@@ -215,5 +221,50 @@ describe('State: history', () => {
     addToHistory({ id: 'a', joke: 'A' });
     addToHistory({ id: 'b', joke: 'B' });
     expect(isAtHistoryEnd()).toBe(false);
+  });
+});
+
+describe('State: ratings', () => {
+  beforeEach(() => {
+    initRatings();
+  });
+
+  it('getRating returns null for an unrated joke', () => {
+    expect(getRating('unknown-id')).toBeNull();
+  });
+
+  it('setRating("up") stores an up rating', () => {
+    setRating('joke-1', 'up');
+    expect(getRating('joke-1')).toBe('up');
+  });
+
+  it('setRating("down") stores a down rating', () => {
+    setRating('joke-1', 'down');
+    expect(getRating('joke-1')).toBe('down');
+  });
+
+  it('calling setRating with the same value toggles back to null', () => {
+    setRating('joke-1', 'up');
+    setRating('joke-1', 'up'); // same value = clear
+    expect(getRating('joke-1')).toBeNull();
+  });
+
+  it('calling setRating with the opposite value changes the rating', () => {
+    setRating('joke-1', 'up');
+    setRating('joke-1', 'down'); // change direction
+    expect(getRating('joke-1')).toBe('down');
+  });
+
+  it('ratings are independent per joke ID', () => {
+    setRating('joke-1', 'up');
+    setRating('joke-2', 'down');
+    expect(getRating('joke-1')).toBe('up');
+    expect(getRating('joke-2')).toBe('down');
+  });
+
+  it('initRatings resets state from storage (mocked as empty)', () => {
+    setRating('joke-1', 'up');
+    initRatings(); // mock returns {}
+    expect(getRating('joke-1')).toBeNull();
   });
 });
