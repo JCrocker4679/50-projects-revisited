@@ -59,6 +59,11 @@ function setupDOM(): void {
 describe('UI: renderJoke()', () => {
   beforeEach(setupDOM);
 
+  it('does not throw when joke element is missing', () => {
+    document.getElementById('joke')?.remove();
+    expect(() => renderJoke('test')).not.toThrow();
+  });
+
   it('sets joke text via textContent', () => {
     renderJoke('Why did the bike fall over? It was two-tired.');
     const jokeEl = document.getElementById('joke');
@@ -151,6 +156,18 @@ describe('UI: renderError()', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('retry button click does not throw when no handler is registered', () => {
+    // Clear any previously registered handler
+    setRetryHandler(() => {});
+    setRetryHandler(null as unknown as () => void);
+
+    renderError('error', 'network');
+    const retryBtn = document
+      .getElementById('joke')
+      ?.querySelector('.retry-btn') as HTMLButtonElement;
+    expect(() => retryBtn.click()).not.toThrow();
+  });
+
   it('adds joke--error class', () => {
     renderError('error', 'network');
     const jokeEl = document.getElementById('joke');
@@ -192,10 +209,25 @@ describe('UI: renderError()', () => {
       'joke factory',
     );
   });
+
+  it('does not throw when joke element is missing', () => {
+    document.getElementById('joke')?.remove();
+    expect(() => renderError('error', 'network')).not.toThrow();
+  });
 });
 
 describe('UI: showLoading()', () => {
   beforeEach(setupDOM);
+
+  it('does not throw when joke element is missing', () => {
+    document.getElementById('joke')?.remove();
+    expect(() => showLoading(false)).not.toThrow();
+  });
+
+  it('does not throw when jokeBtn element is missing', () => {
+    document.getElementById('jokeBtn')?.remove();
+    expect(() => showLoading(false)).not.toThrow();
+  });
 
   it('sets aria-busy to "true" on joke element', () => {
     showLoading(false);
@@ -239,6 +271,16 @@ describe('UI: showLoading()', () => {
 describe('UI: hideLoading()', () => {
   beforeEach(setupDOM);
 
+  it('does not throw when joke element is missing', () => {
+    document.getElementById('joke')?.remove();
+    expect(() => hideLoading()).not.toThrow();
+  });
+
+  it('does not throw when jokeBtn element is missing', () => {
+    document.getElementById('jokeBtn')?.remove();
+    expect(() => hideLoading()).not.toThrow();
+  });
+
   it('sets aria-busy to "false"', () => {
     showLoading(false);
     hideLoading();
@@ -263,6 +305,13 @@ describe('UI: hideLoading()', () => {
 
 describe('UI: renderHistoryNav()', () => {
   beforeEach(setupDOM);
+
+  it('does not throw when nav elements are missing', () => {
+    document.getElementById('prevBtn')?.remove();
+    document.getElementById('nextBtn')?.remove();
+    document.querySelector('.history-counter')?.remove();
+    expect(() => renderHistoryNav(0, 5)).not.toThrow();
+  });
 
   it('disables prevBtn when at oldest joke (index === total - 1)', () => {
     renderHistoryNav(4, 5);
@@ -428,10 +477,21 @@ describe('UI: updateFavouritesCount()', () => {
     updateFavouritesCount(5);
     expect(document.getElementById('favCount')?.textContent).toBe('5');
   });
+
+  it('does not throw when favCount element is missing', () => {
+    document.getElementById('favCount')?.remove();
+    expect(() => updateFavouritesCount(3)).not.toThrow();
+  });
 });
 
 describe('UI: toggleFavouritesPanel()', () => {
   beforeEach(setupDOM);
+
+  it('does not throw when panel and button are missing', () => {
+    document.getElementById('favPanel')?.remove();
+    document.getElementById('favListBtn')?.remove();
+    expect(() => toggleFavouritesPanel(true)).not.toThrow();
+  });
 
   it('shows panel when open=true', () => {
     toggleFavouritesPanel(true);
@@ -479,5 +539,10 @@ describe('UI: renderFavouritesList()', () => {
     const text = document.querySelector('.fav-item__text');
     expect(text?.textContent).toBe('<script>alert(1)</script>');
     expect(document.querySelector('script')).toBeNull();
+  });
+
+  it('does nothing if favPanel element is missing', () => {
+    document.getElementById('favPanel')?.remove();
+    expect(() => renderFavouritesList([{ id: 'a', joke: 'A' }], vi.fn())).not.toThrow();
   });
 });
