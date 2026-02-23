@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - **Rating types**: `RatingValue` (`'up' | 'down' | null`) and `JokeRatings` (`Record<string, RatingValue>`) added to `types.ts`
 - **Rating state**: `initRatings`, `getRating`, `setRating` in `state.ts`; toggle behaviour — calling `setRating` with the current value clears it back to null
 - **Rating persistence**: `loadRatings` / `saveRatings` in `storage.ts`; stored under `dad-jokes-ratings-v1`; unbounded `Record` (no eviction)
+- **Rating UI**: thumbs up 👍 and thumbs down 👎 buttons in the history-nav row (right side); `aria-pressed` tracks active state; `rating-btn--up-active` / `rating-btn--down-active` CSS classes provide green/red visual feedback; rating updates on history navigation and on new joke fetch; `updateRatingButtons()` added to `ui.ts`
 
 ---
 

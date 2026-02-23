@@ -17,6 +17,7 @@ import {
   updateFavouritesCount,
   toggleFavouritesPanel,
   renderFavouritesList,
+  updateRatingButtons,
 } from './ui.ts';
 import {
   getCurrentJoke,
@@ -30,6 +31,9 @@ import {
   getFavourites,
   isFavourited,
   toggleFavourite,
+  initRatings,
+  getRating,
+  setRating,
 } from './state.ts';
 import { trackJokeFetched, trackErrorShown, trackRetryClicked } from './analytics.ts';
 
@@ -47,6 +51,8 @@ const copyBtn = document.getElementById('copyBtn') as HTMLButtonElement | null;
 const shareBtn = document.getElementById('shareBtn') as HTMLButtonElement | null;
 const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElement | null;
 const favListBtn = document.getElementById('favListBtn') as HTMLButtonElement | null;
+const thumbsUpBtn = document.getElementById('thumbsUpBtn') as HTMLButtonElement | null;
+const thumbsDownBtn = document.getElementById('thumbsDownBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 let favPanelOpen = false;
@@ -84,6 +90,7 @@ async function generateJoke(): Promise<void> {
     addToHistory(joke);
     updateHistoryNav();
     updateFavouriteButton(isFavourited(joke.id));
+    updateRatingButtons(getRating(joke.id));
     trackJokeFetched(joke.id);
   } catch (error) {
     const cached = lastJoke ?? undefined;
@@ -151,11 +158,14 @@ function handleHistoryNav(direction: 'back' | 'forward'): void {
   if (!joke) return;
   renderJoke(joke.joke);
   updateHistoryNav();
+  updateFavouriteButton(isFavourited(joke.id));
+  updateRatingButtons(getRating(joke.id));
 }
 
 // Seed state from localStorage
 initHistory();
 initFavourites();
+initRatings();
 refreshFavouritesUI();
 
 // Wire up retry handler so the retry button in error state can trigger a new fetch
@@ -176,6 +186,20 @@ favouriteBtn?.addEventListener('click', () => {
   toggleFavourite(joke);
   updateFavouriteButton(isFavourited(joke.id));
   refreshFavouritesUI();
+});
+
+thumbsUpBtn?.addEventListener('click', () => {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+  setRating(joke.id, 'up');
+  updateRatingButtons(getRating(joke.id));
+});
+
+thumbsDownBtn?.addEventListener('click', () => {
+  const joke = getCurrentJoke();
+  if (!joke) return;
+  setRating(joke.id, 'down');
+  updateRatingButtons(getRating(joke.id));
 });
 
 favListBtn?.addEventListener('click', () => {

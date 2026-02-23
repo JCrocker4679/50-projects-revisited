@@ -64,23 +64,43 @@
         >★</button>
       </div>
       <nav class="history-nav" aria-label="Joke history navigation">
-        <button
-          id="prevBtn"
-          class="btn btn--nav"
-          type="button"
-          aria-label="Previous joke"
-          aria-disabled="true"
-          disabled
-        >← Prev</button>
-        <span class="history-counter" aria-live="polite" hidden></span>
-        <button
-          id="nextBtn"
-          class="btn btn--nav"
-          type="button"
-          aria-label="Next joke"
-          aria-disabled="true"
-          disabled
-        >Next →</button>
+        <div class="history-nav__left">
+          <button
+            id="prevBtn"
+            class="btn btn--nav"
+            type="button"
+            aria-label="Previous joke"
+            aria-disabled="true"
+            disabled
+          >← Prev</button>
+          <span class="history-counter" aria-live="polite" hidden></span>
+          <button
+            id="nextBtn"
+            class="btn btn--nav"
+            type="button"
+            aria-label="Next joke"
+            aria-disabled="true"
+            disabled
+          >Next →</button>
+        </div>
+        <div class="history-nav__rating">
+          <button
+            id="thumbsDownBtn"
+            class="btn btn--icon"
+            type="button"
+            aria-label="Rate joke down"
+            aria-pressed="false"
+            title="Rate joke down"
+          >👎</button>
+          <button
+            id="thumbsUpBtn"
+            class="btn btn--icon"
+            type="button"
+            aria-label="Rate joke up"
+            aria-pressed="false"
+            title="Rate joke up"
+          >👍</button>
+        </div>
       </nav>
       <div class="fav-toggle-row">
         <button

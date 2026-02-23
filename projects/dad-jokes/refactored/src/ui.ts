@@ -1,3 +1,5 @@
+import type { Joke, RatingValue } from './types.ts';
+
 /**
  * UI rendering functions.
  *
@@ -101,6 +103,27 @@ export function renderHistoryNav(index: number, total: number): void {
 }
 
 /**
+ * Update thumbs up/down rating buttons to reflect the current rating for a joke.
+ * Sets aria-pressed and active CSS class on each button.
+ */
+export function updateRatingButtons(rating: RatingValue): void {
+  const upBtn = document.getElementById('thumbsUpBtn') as HTMLButtonElement | null;
+  const downBtn = document.getElementById('thumbsDownBtn') as HTMLButtonElement | null;
+
+  if (upBtn) {
+    const isUp = rating === 'up';
+    upBtn.setAttribute('aria-pressed', String(isUp));
+    upBtn.classList.toggle('rating-btn--up-active', isUp);
+  }
+
+  if (downBtn) {
+    const isDown = rating === 'down';
+    downBtn.setAttribute('aria-pressed', String(isDown));
+    downBtn.classList.toggle('rating-btn--down-active', isDown);
+  }
+}
+
+/**
  * Update the favourite (star) button aria state.
  */
 export function updateFavouriteButton(favourited: boolean): void {
@@ -128,8 +151,6 @@ export function toggleFavouritesPanel(open: boolean): void {
   if (panel) panel.hidden = !open;
   if (btn) btn.setAttribute('aria-expanded', String(open));
 }
-
-import type { Joke } from './types.ts';
 
 /**
  * Render the favourites list into the panel.

@@ -27,6 +27,7 @@ import {
   updateFavouritesCount,
   toggleFavouritesPanel,
   renderFavouritesList,
+  updateRatingButtons,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -42,9 +43,15 @@ function setupDOM(): void {
         <button id="favouriteBtn" class="btn btn--icon" aria-pressed="false" aria-label="Add to favourites">★</button>
       </div>
       <nav class="history-nav" aria-label="Joke history navigation">
-        <button id="prevBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Previous joke">← Prev</button>
-        <span class="history-counter" aria-live="polite" hidden></span>
-        <button id="nextBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Next joke">Next →</button>
+        <div class="history-nav__left">
+          <button id="prevBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Previous joke">← Prev</button>
+          <span class="history-counter" aria-live="polite" hidden></span>
+          <button id="nextBtn" class="btn btn--nav" disabled aria-disabled="true" aria-label="Next joke">Next →</button>
+        </div>
+        <div class="history-nav__rating">
+          <button id="thumbsDownBtn" class="btn btn--icon" aria-label="Rate joke down" aria-pressed="false">👎</button>
+          <button id="thumbsUpBtn" class="btn btn--icon" aria-label="Rate joke up" aria-pressed="false">👍</button>
+        </div>
       </nav>
       <div class="fav-toggle-row">
         <button id="favListBtn" class="btn btn--ghost" aria-expanded="false" aria-controls="favPanel">
@@ -544,5 +551,53 @@ describe('UI: renderFavouritesList()', () => {
   it('does nothing if favPanel element is missing', () => {
     document.getElementById('favPanel')?.remove();
     expect(() => renderFavouritesList([{ id: 'a', joke: 'A' }], vi.fn())).not.toThrow();
+  });
+});
+
+describe('UI: updateRatingButtons()', () => {
+  beforeEach(setupDOM);
+
+  it('sets aria-pressed "true" on thumbs-up when rating is "up"', () => {
+    updateRatingButtons('up');
+    expect(document.getElementById('thumbsUpBtn')?.getAttribute('aria-pressed')).toBe('true');
+    expect(document.getElementById('thumbsDownBtn')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('sets aria-pressed "true" on thumbs-down when rating is "down"', () => {
+    updateRatingButtons('down');
+    expect(document.getElementById('thumbsDownBtn')?.getAttribute('aria-pressed')).toBe('true');
+    expect(document.getElementById('thumbsUpBtn')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('sets both aria-pressed "false" when rating is null', () => {
+    updateRatingButtons('up');
+    updateRatingButtons(null);
+    expect(document.getElementById('thumbsUpBtn')?.getAttribute('aria-pressed')).toBe('false');
+    expect(document.getElementById('thumbsDownBtn')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('adds rating-btn--up-active class when rated up', () => {
+    updateRatingButtons('up');
+    expect(document.getElementById('thumbsUpBtn')?.classList.contains('rating-btn--up-active')).toBe(true);
+    expect(document.getElementById('thumbsDownBtn')?.classList.contains('rating-btn--down-active')).toBe(false);
+  });
+
+  it('adds rating-btn--down-active class when rated down', () => {
+    updateRatingButtons('down');
+    expect(document.getElementById('thumbsDownBtn')?.classList.contains('rating-btn--down-active')).toBe(true);
+    expect(document.getElementById('thumbsUpBtn')?.classList.contains('rating-btn--up-active')).toBe(false);
+  });
+
+  it('removes active classes when rating cleared', () => {
+    updateRatingButtons('up');
+    updateRatingButtons(null);
+    expect(document.getElementById('thumbsUpBtn')?.classList.contains('rating-btn--up-active')).toBe(false);
+    expect(document.getElementById('thumbsDownBtn')?.classList.contains('rating-btn--down-active')).toBe(false);
+  });
+
+  it('does not throw when buttons are missing', () => {
+    document.getElementById('thumbsUpBtn')?.remove();
+    document.getElementById('thumbsDownBtn')?.remove();
+    expect(() => updateRatingButtons('up')).not.toThrow();
   });
 });
