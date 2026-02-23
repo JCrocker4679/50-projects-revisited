@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Sprint 3] — 2026-02-23
+
+### Sprint 3 in progress — entries added per ticket
+
+---
+
 ## [Sprint 2] — 2026-02-22
 
 ### Added
