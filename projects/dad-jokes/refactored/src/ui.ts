@@ -1,6 +1,18 @@
 import type { Joke, RatingValue } from './types.ts';
 
 /**
+ * Update the dark mode toggle button to reflect the current theme.
+ */
+export function updateThemeToggle(theme: 'light' | 'dark'): void {
+  const btn = document.getElementById('themeToggleBtn') as HTMLButtonElement | null;
+  if (!btn) return;
+  const isDark = theme === 'dark';
+  btn.setAttribute('aria-pressed', String(isDark));
+  btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  btn.textContent = isDark ? '☀' : '☾';
+}
+
+/**
  * UI rendering functions.
  *
  * All DOM updates go through this module.

@@ -18,7 +18,9 @@ import {
   toggleFavouritesPanel,
   renderFavouritesList,
   updateRatingButtons,
+  updateThemeToggle,
 } from './ui.ts';
+import { getTheme, toggleTheme } from './theme.ts';
 import {
   getCurrentJoke,
   setCurrentJoke,
@@ -53,6 +55,7 @@ const favouriteBtn = document.getElementById('favouriteBtn') as HTMLButtonElemen
 const favListBtn = document.getElementById('favListBtn') as HTMLButtonElement | null;
 const thumbsUpBtn = document.getElementById('thumbsUpBtn') as HTMLButtonElement | null;
 const thumbsDownBtn = document.getElementById('thumbsDownBtn') as HTMLButtonElement | null;
+const themeToggleBtn = document.getElementById('themeToggleBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 let favPanelOpen = false;
@@ -168,6 +171,9 @@ initFavourites();
 initRatings();
 refreshFavouritesUI();
 
+// Sync theme toggle button with current theme (applied before paint by theme-init.ts)
+updateThemeToggle(getTheme());
+
 // Wire up retry handler so the retry button in error state can trigger a new fetch
 setRetryHandler(() => {
   trackRetryClicked();
@@ -214,6 +220,11 @@ favListBtn?.addEventListener('click', () => {
       refreshFavouritesUI();
     });
   }
+});
+
+themeToggleBtn?.addEventListener('click', () => {
+  const next = toggleTheme();
+  updateThemeToggle(next);
 });
 
 // Load first joke immediately

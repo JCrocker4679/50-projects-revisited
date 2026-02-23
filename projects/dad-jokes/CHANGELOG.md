@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - **Rating state**: `initRatings`, `getRating`, `setRating` in `state.ts`; toggle behaviour — calling `setRating` with the current value clears it back to null
 - **Rating persistence**: `loadRatings` / `saveRatings` in `storage.ts`; stored under `dad-jokes-ratings-v1`; unbounded `Record` (no eviction)
 - **Rating UI**: thumbs up 👍 and thumbs down 👎 buttons in the history-nav row (right side); `aria-pressed` tracks active state; `rating-btn--up-active` / `rating-btn--down-active` CSS classes provide green/red visual feedback; rating updates on history navigation and on new joke fetch; `updateRatingButtons()` added to `ui.ts`
+- **Dark mode toggle**: fixed top-right button (sun/moon icon); toggles `[data-theme="dark"]` on `<html>`; persists preference to `localStorage` (`dad-jokes-theme`); respects `prefers-color-scheme` on first visit; no FOUC — theme applied before paint via `src/theme-init.ts` module script in `<head>`; correct `aria-label` and `aria-pressed` on every render; `src/theme.ts` module handles all toggle/persist logic; `updateThemeToggle()` added to `ui.ts`
 
 ---
 
