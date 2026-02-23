@@ -1,11 +1,11 @@
 /**
- * Storage tests — Tickets #32 / #36
+ * Storage tests — Tickets #32 / #36 / #64
  *
- * Tests localStorage persistence for joke history and favourites.
+ * Tests localStorage persistence for joke history, favourites, and ratings.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { loadHistory, saveHistory, loadFavourites, saveFavourites } from '../storage.ts';
+import { loadHistory, saveHistory, loadFavourites, saveFavourites, loadRatings, saveRatings } from '../storage.ts';
 
 // Minimal localStorage mock
 const store: Record<string, string> = {};
@@ -112,5 +112,62 @@ describe('saveFavourites', () => {
 
     expect(loadHistory()).toEqual(historyJokes);
     expect(loadFavourites()).toEqual(favJokes);
+  });
+});
+
+// ===== loadRatings =====
+
+describe('loadRatings', () => {
+  it('returns {} when key does not exist', () => {
+    expect(loadRatings()).toEqual({});
+  });
+
+  it('returns parsed object when valid JSON is stored', () => {
+    const ratings = { 'joke-1': 'up', 'joke-2': 'down' };
+    store['dad-jokes-ratings-v1'] = JSON.stringify(ratings);
+    expect(loadRatings()).toEqual(ratings);
+  });
+
+  it('returns {} when stored value is invalid JSON', () => {
+    store['dad-jokes-ratings-v1'] = 'not-json{{{';
+    expect(loadRatings()).toEqual({});
+  });
+
+  it('returns {} when stored value is an array (wrong shape)', () => {
+    store['dad-jokes-ratings-v1'] = JSON.stringify(['up', 'down']);
+    expect(loadRatings()).toEqual({});
+  });
+
+  it('returns {} when stored value is null JSON', () => {
+    store['dad-jokes-ratings-v1'] = JSON.stringify(null);
+    expect(loadRatings()).toEqual({});
+  });
+});
+
+// ===== saveRatings =====
+
+describe('saveRatings', () => {
+  it('persists ratings to localStorage', () => {
+    const ratings = { 'joke-1': 'up' as const };
+    saveRatings(ratings);
+    expect(store['dad-jokes-ratings-v1']).toBe(JSON.stringify(ratings));
+  });
+
+  it('does not throw when localStorage throws (quota exceeded)', () => {
+    localStorageMock.setItem.mockImplementationOnce(() => {
+      throw new DOMException('QuotaExceededError');
+    });
+    expect(() => saveRatings({ 'joke-1': 'down' })).not.toThrow();
+  });
+
+  it('ratings use a separate storage key from history and favourites', () => {
+    const historyJokes = [{ id: 'h1', joke: 'History joke' }];
+    const ratings = { 'joke-r': 'up' as const };
+
+    saveHistory(historyJokes);
+    saveRatings(ratings);
+
+    expect(loadHistory()).toEqual(historyJokes);
+    expect(loadRatings()).toEqual(ratings);
   });
 });

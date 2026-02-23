@@ -1,5 +1,5 @@
-import type { AppState, Joke } from './types.ts';
-import { loadHistory, saveHistory, loadFavourites, saveFavourites } from './storage.ts';
+import type { AppState, Joke, RatingValue } from './types.ts';
+import { loadHistory, saveHistory, loadFavourites, saveFavourites, loadRatings, saveRatings } from './storage.ts';
 
 const MAX_HISTORY = 50;
 const MAX_FAVOURITES = 100;
@@ -11,6 +11,7 @@ const state: AppState = {
   history: [],
   historyIndex: 0,
   favourites: [],
+  ratings: {},
 };
 
 // --- Current joke ---
@@ -103,4 +104,29 @@ export function toggleFavourite(joke: Joke): void {
     state.favourites = [joke, ...state.favourites].slice(0, MAX_FAVOURITES);
   }
   saveFavourites(state.favourites);
+}
+
+// --- Ratings ---
+
+export function initRatings(): void {
+  state.ratings = loadRatings();
+}
+
+export function getRating(jokeId: string): RatingValue {
+  return state.ratings[jokeId] ?? null;
+}
+
+/**
+ * Set a rating for a joke. Calling with the same value as the current rating
+ * acts as a toggle — it clears the rating back to null.
+ */
+export function setRating(jokeId: string, rating: RatingValue): void {
+  const current = getRating(jokeId);
+  const next: RatingValue = current === rating ? null : rating;
+  if (next === null) {
+    delete state.ratings[jokeId];
+  } else {
+    state.ratings[jokeId] = next;
+  }
+  saveRatings(state.ratings);
 }

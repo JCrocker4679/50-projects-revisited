@@ -15,6 +15,12 @@ export interface ApiResponse {
   status: number;
 }
 
+/** A user's rating for a single joke. null = not yet rated */
+export type RatingValue = 'up' | 'down' | null;
+
+/** Map of joke ID → rating. Unbounded — grows with usage, no eviction. */
+export type JokeRatings = Record<string, RatingValue>;
+
 /** Application state */
 export interface AppState {
   currentJoke: Joke | null;
@@ -23,4 +29,5 @@ export interface AppState {
   history: Joke[];
   historyIndex: number;
   favourites: Joke[];
+  ratings: JokeRatings;
 }

@@ -2,13 +2,14 @@
  * localStorage persistence module.
  */
 
-import type { Joke } from './types.ts';
+import type { Joke, JokeRatings } from './types.ts';
 
 /** Storage schema version for future migrations */
 export const STORAGE_VERSION = 1;
 
 const HISTORY_KEY = 'dad-jokes-history-v1';
 const FAVOURITES_KEY = 'dad-jokes-favourites-v1';
+const RATINGS_KEY = 'dad-jokes-ratings-v1';
 
 export function loadHistory(): Joke[] {
   return loadJsonArray(HISTORY_KEY);
@@ -24,6 +25,22 @@ export function loadFavourites(): Joke[] {
 
 export function saveFavourites(favourites: Joke[]): void {
   saveJson(FAVOURITES_KEY, favourites);
+}
+
+export function loadRatings(): JokeRatings {
+  try {
+    const raw = localStorage.getItem(RATINGS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    return parsed as JokeRatings;
+  } catch {
+    return {};
+  }
+}
+
+export function saveRatings(ratings: JokeRatings): void {
+  saveJson(RATINGS_KEY, ratings);
 }
 
 function loadJsonArray(key: string): Joke[] {
