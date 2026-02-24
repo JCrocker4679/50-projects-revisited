@@ -271,6 +271,113 @@ export function renderJoke(jokeText: string): void {
 }
 
 /**
+ * Set search input/button to loading state while a search is in flight.
+ */
+export function setSearchLoading(loading: boolean): void {
+  const input = document.getElementById('searchInput') as HTMLInputElement | null;
+  const btn = document.getElementById('searchBtn') as HTMLButtonElement | null;
+  if (input) input.disabled = loading;
+  if (btn) {
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Searching...' : 'Search';
+  }
+}
+
+/**
+ * Render search results into the list.
+ * Each item is a <button> for keyboard/click accessibility.
+ * Calls onSelect(index) when a result is clicked.
+ */
+export function renderSearchResults(
+  results: Joke[],
+  term: string,
+  totalJokes: number,
+  activeIndex: number | null,
+  onSelect: (index: number) => void,
+): void {
+  const meta = document.getElementById('searchMeta') as HTMLElement | null;
+  const list = document.getElementById('searchResults') as HTMLElement | null;
+  const clearBtn = document.getElementById('searchClearBtn') as HTMLButtonElement | null;
+
+  if (clearBtn) clearBtn.hidden = false;
+
+  if (meta) {
+    if (results.length === 0) {
+      meta.textContent = `No jokes found for "${term}". Try a different word.`;
+    } else {
+      const countText =
+        totalJokes > results.length
+          ? `Showing ${results.length} of ${totalJokes} results for "${term}"`
+          : `${results.length} result${results.length === 1 ? '' : 's'} for "${term}"`;
+      meta.textContent = countText;
+    }
+    meta.hidden = false;
+  }
+
+  if (!list) return;
+  list.textContent = '';
+
+  if (results.length === 0) {
+    list.hidden = true;
+    return;
+  }
+
+  list.hidden = false;
+
+  results.forEach((joke, i) => {
+    const li = document.createElement('li');
+    li.className = 'search-result-item';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'search-result-btn';
+    btn.textContent = joke.joke;
+    if (i === activeIndex) {
+      btn.classList.add('search-result-btn--active');
+      btn.setAttribute('aria-current', 'true');
+    }
+    btn.addEventListener('click', () => onSelect(i));
+
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+/**
+ * Hide search results and meta, reset input value, hide clear button.
+ * Called when search is cleared.
+ */
+export function clearSearchUI(): void {
+  const meta = document.getElementById('searchMeta') as HTMLElement | null;
+  const list = document.getElementById('searchResults') as HTMLElement | null;
+  const clearBtn = document.getElementById('searchClearBtn') as HTMLButtonElement | null;
+  const input = document.getElementById('searchInput') as HTMLInputElement | null;
+  if (meta) { meta.hidden = true; meta.textContent = ''; }
+  if (list) { list.hidden = true; list.textContent = ''; }
+  if (clearBtn) clearBtn.hidden = true;
+  if (input) input.value = '';
+}
+
+/**
+ * Disable or re-enable history nav buttons and counter.
+ * Called when entering / leaving search mode.
+ */
+export function setHistoryNavDisabled(disabled: boolean): void {
+  const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
+  const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
+  const counter = document.querySelector('.history-counter') as HTMLElement | null;
+  if (prevBtn) {
+    prevBtn.disabled = disabled;
+    prevBtn.setAttribute('aria-disabled', String(disabled));
+  }
+  if (nextBtn) {
+    nextBtn.disabled = disabled;
+    nextBtn.setAttribute('aria-disabled', String(disabled));
+  }
+  if (counter) counter.hidden = disabled;
+}
+
+/**
  * Display an error message with a retry button.
  * Uses copy from DECISIONS.md D14 based on error type.
  * If a cached joke is provided, shows it as a fallback below the error.
