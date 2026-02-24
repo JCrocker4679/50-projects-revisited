@@ -2,7 +2,7 @@ import '@fontsource/roboto/latin-400.css';
 import '@fontsource/roboto/latin-700.css';
 import './style.css';
 import { inject } from '@vercel/analytics';
-import { fetchJoke, ApiError } from './api.ts';
+import { fetchJoke, searchJokes, ApiError } from './api.ts';
 import {
   renderJoke,
   renderError,
@@ -19,6 +19,10 @@ import {
   renderFavouritesList,
   updateRatingButtons,
   updateThemeToggle,
+  setSearchLoading,
+  renderSearchResults,
+  clearSearchUI,
+  setHistoryNavDisabled,
 } from './ui.ts';
 import { getTheme, toggleTheme } from './theme.ts';
 import {
@@ -36,6 +40,11 @@ import {
   initRatings,
   getRating,
   setRating,
+  isSearchActive,
+  setSearchResults,
+  selectSearchResult,
+  clearSearch,
+  getSearchState,
 } from './state.ts';
 import { trackJokeFetched, trackErrorShown, trackRetryClicked } from './analytics.ts';
 
@@ -56,9 +65,13 @@ const favListBtn = document.getElementById('favListBtn') as HTMLButtonElement | 
 const thumbsUpBtn = document.getElementById('thumbsUpBtn') as HTMLButtonElement | null;
 const thumbsDownBtn = document.getElementById('thumbsDownBtn') as HTMLButtonElement | null;
 const themeToggleBtn = document.getElementById('themeToggleBtn') as HTMLButtonElement | null;
+const searchForm = document.getElementById('searchForm') as HTMLFormElement | null;
+const searchClearBtn = document.getElementById('searchClearBtn') as HTMLButtonElement | null;
 let isFirstLoad = true;
 let lastJoke: string | null = null;
 let favPanelOpen = false;
+/** Joke visible before a search was triggered — restored when search is cleared. */
+let priorToSearchJoke: import('./types.ts').Joke | null = null;
 
 function updateHistoryNav(): void {
   renderHistoryNav(getHistoryIndex(), getHistory().length);
@@ -79,6 +92,12 @@ function refreshFavouritesUI(): void {
 }
 
 async function generateJoke(): Promise<void> {
+  if (isSearchActive()) {
+    clearSearch();
+    clearSearchUI();
+    setHistoryNavDisabled(false);
+  }
+
   setCopyButtonEnabled(false);
   setShareButtonEnabled(false);
   showLoading(isFirstLoad);
@@ -86,6 +105,7 @@ async function generateJoke(): Promise<void> {
   try {
     const joke = await fetchJoke();
     lastJoke = joke.joke;
+    priorToSearchJoke = joke;
     setCurrentJoke(joke);
     renderJoke(joke.joke);
     setCopyButtonEnabled(true);
@@ -165,6 +185,63 @@ function handleHistoryNav(direction: 'back' | 'forward'): void {
   updateRatingButtons(getRating(joke.id));
 }
 
+async function handleSearch(term: string): Promise<void> {
+  priorToSearchJoke = getCurrentJoke();
+  setSearchLoading(true);
+  try {
+    const response = await searchJokes(term);
+    setSearchResults(response.results, term);
+    const { searchResults, selectedSearchIndex } = getSearchState();
+    renderSearchResults(searchResults, term, response.total_jokes, selectedSearchIndex, handleSelectSearchResult);
+    setHistoryNavDisabled(true);
+    if (searchResults.length > 0) {
+      const joke = searchResults[0];
+      renderJoke(joke.joke);
+      setCopyButtonEnabled(true);
+      setShareButtonEnabled(true);
+      updateFavouriteButton(isFavourited(joke.id));
+      updateRatingButtons(getRating(joke.id));
+    }
+  } catch (error) {
+    if (error instanceof ApiError) {
+      renderError(error.message, error.type);
+    }
+  } finally {
+    setSearchLoading(false);
+  }
+}
+
+function handleSelectSearchResult(index: number): void {
+  selectSearchResult(index);
+  const { searchResults } = getSearchState();
+  const joke = searchResults[index];
+  if (!joke) return;
+  renderJoke(joke.joke);
+  setCopyButtonEnabled(true);
+  setShareButtonEnabled(true);
+  updateFavouriteButton(isFavourited(joke.id));
+  updateRatingButtons(getRating(joke.id));
+  // Collapse the results list after selection (keep term in input, X still visible)
+  const list = document.getElementById('searchResults') as HTMLElement | null;
+  if (list) list.hidden = true;
+}
+
+function handleClearSearch(): void {
+  clearSearch();
+  clearSearchUI();
+  setHistoryNavDisabled(false);
+  updateHistoryNav();
+  if (priorToSearchJoke) {
+    setCurrentJoke(priorToSearchJoke);
+    lastJoke = priorToSearchJoke.joke;
+    renderJoke(priorToSearchJoke.joke);
+    setCopyButtonEnabled(true);
+    setShareButtonEnabled(true);
+    updateFavouriteButton(isFavourited(priorToSearchJoke.id));
+    updateRatingButtons(getRating(priorToSearchJoke.id));
+  }
+}
+
 // Seed state from localStorage
 initHistory();
 initFavourites();
@@ -226,6 +303,16 @@ themeToggleBtn?.addEventListener('click', () => {
   const next = toggleTheme();
   updateThemeToggle(next);
 });
+
+searchForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('searchInput') as HTMLInputElement | null;
+  const term = input?.value.trim() ?? '';
+  if (!term) return;
+  handleSearch(term);
+});
+
+searchClearBtn?.addEventListener('click', handleClearSearch);
 
 // Load first joke immediately
 generateJoke();

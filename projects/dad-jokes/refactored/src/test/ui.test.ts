@@ -30,6 +30,10 @@ import {
   renderFavouritesList,
   updateRatingButtons,
   updateThemeToggle,
+  setSearchLoading,
+  renderSearchResults,
+  clearSearchUI,
+  setHistoryNavDisabled,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -37,6 +41,13 @@ function setupDOM(): void {
   document.body.innerHTML = `
     <div class="container">
       <h3>Don't Laugh Challenge</h3>
+      <form id="searchForm" role="search">
+        <input id="searchInput" type="search" />
+        <button id="searchBtn" type="submit">Search</button>
+        <button id="searchClearBtn" type="button" hidden>✕</button>
+      </form>
+      <p id="searchMeta" hidden></p>
+      <ul id="searchResults" hidden></ul>
       <div class="joke" id="joke">// Joke goes here</div>
       <div class="action-row">
         <button id="jokeBtn" class="btn">Get Another Joke</button>
@@ -631,5 +642,213 @@ describe('UI: updateThemeToggle()', () => {
   it('does not throw when button is missing', () => {
     document.getElementById('themeToggleBtn')?.remove();
     expect(() => updateThemeToggle('dark')).not.toThrow();
+  });
+});
+
+// ===== Search UI functions (#62) =====
+
+describe('UI: setSearchLoading()', () => {
+  beforeEach(setupDOM);
+
+  it('disables input and button when loading', () => {
+    setSearchLoading(true);
+    expect((document.getElementById('searchInput') as HTMLInputElement).disabled).toBe(true);
+    expect((document.getElementById('searchBtn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('changes button text to "Searching..." when loading', () => {
+    setSearchLoading(true);
+    expect(document.getElementById('searchBtn')?.textContent).toBe('Searching...');
+  });
+
+  it('re-enables input and button when not loading', () => {
+    setSearchLoading(true);
+    setSearchLoading(false);
+    expect((document.getElementById('searchInput') as HTMLInputElement).disabled).toBe(false);
+    expect((document.getElementById('searchBtn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('restores button text to "Search" when not loading', () => {
+    setSearchLoading(true);
+    setSearchLoading(false);
+    expect(document.getElementById('searchBtn')?.textContent).toBe('Search');
+  });
+
+  it('does not throw when elements are missing', () => {
+    document.getElementById('searchInput')?.remove();
+    document.getElementById('searchBtn')?.remove();
+    expect(() => setSearchLoading(true)).not.toThrow();
+  });
+});
+
+const SEARCH_JOKES = [
+  { id: 's1', joke: 'Cat joke 1' },
+  { id: 's2', joke: 'Cat joke 2' },
+];
+
+describe('UI: renderSearchResults()', () => {
+  beforeEach(setupDOM);
+
+  it('shows the clear button', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, 0, vi.fn());
+    expect((document.getElementById('searchClearBtn') as HTMLElement).hidden).toBe(false);
+  });
+
+  it('renders meta text with result count', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, 0, vi.fn());
+    expect(document.getElementById('searchMeta')?.textContent).toContain('2');
+    expect(document.getElementById('searchMeta')?.textContent).toContain('cat');
+  });
+
+  it('renders "Showing X of Y results" when total > results.length', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 50, 0, vi.fn());
+    expect(document.getElementById('searchMeta')?.textContent).toContain('Showing 2 of 50');
+  });
+
+  it('shows meta element after render', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, 0, vi.fn());
+    expect((document.getElementById('searchMeta') as HTMLElement).hidden).toBe(false);
+  });
+
+  it('renders one button per result', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, null, vi.fn());
+    expect(document.querySelectorAll('.search-result-btn')).toHaveLength(2);
+  });
+
+  it('sets result text via textContent (XSS safe)', () => {
+    renderSearchResults([{ id: 'x', joke: '<script>evil()</script>' }], 'cat', 1, null, vi.fn());
+    const btn = document.querySelector('.search-result-btn');
+    expect(btn?.textContent).toBe('<script>evil()</script>');
+    expect(document.querySelector('script')).toBeNull();
+  });
+
+  it('marks active result with class and aria-current', () => {
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, 1, vi.fn());
+    const btns = document.querySelectorAll('.search-result-btn');
+    expect(btns[1].classList.contains('search-result-btn--active')).toBe(true);
+    expect(btns[1].getAttribute('aria-current')).toBe('true');
+  });
+
+  it('calls onSelect with correct index when result clicked', () => {
+    const onSelect = vi.fn();
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, null, onSelect);
+    (document.querySelectorAll('.search-result-btn')[1] as HTMLButtonElement).click();
+    expect(onSelect).toHaveBeenCalledWith(1);
+  });
+
+  it('shows "No jokes found" meta when results are empty', () => {
+    renderSearchResults([], 'zzz', 0, null, vi.fn());
+    expect(document.getElementById('searchMeta')?.textContent).toContain('No jokes found');
+  });
+
+  it('hides the results list when empty', () => {
+    renderSearchResults([], 'zzz', 0, null, vi.fn());
+    expect((document.getElementById('searchResults') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('does not throw when container elements are missing', () => {
+    document.getElementById('searchResults')?.remove();
+    document.getElementById('searchMeta')?.remove();
+    document.getElementById('searchClearBtn')?.remove();
+    expect(() => renderSearchResults(SEARCH_JOKES, 'cat', 2, 0, vi.fn())).not.toThrow();
+  });
+});
+
+describe('UI: clearSearchUI()', () => {
+  beforeEach(() => {
+    setupDOM();
+    // Put the UI into a "post-search" state first
+    renderSearchResults(SEARCH_JOKES, 'cat', 2, 0, vi.fn());
+    (document.getElementById('searchInput') as HTMLInputElement).value = 'cat';
+  });
+
+  it('hides the meta element', () => {
+    clearSearchUI();
+    expect((document.getElementById('searchMeta') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('clears meta text', () => {
+    clearSearchUI();
+    expect(document.getElementById('searchMeta')?.textContent).toBe('');
+  });
+
+  it('hides the results list', () => {
+    clearSearchUI();
+    expect((document.getElementById('searchResults') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('clears the results list content', () => {
+    clearSearchUI();
+    expect(document.getElementById('searchResults')?.textContent).toBe('');
+  });
+
+  it('hides the clear button', () => {
+    clearSearchUI();
+    expect((document.getElementById('searchClearBtn') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('resets the search input value', () => {
+    clearSearchUI();
+    expect((document.getElementById('searchInput') as HTMLInputElement).value).toBe('');
+  });
+
+  it('does not throw when elements are missing', () => {
+    document.getElementById('searchMeta')?.remove();
+    document.getElementById('searchResults')?.remove();
+    document.getElementById('searchClearBtn')?.remove();
+    document.getElementById('searchInput')?.remove();
+    expect(() => clearSearchUI()).not.toThrow();
+  });
+});
+
+describe('UI: setHistoryNavDisabled()', () => {
+  beforeEach(setupDOM);
+
+  it('disables prevBtn and nextBtn when disabled=true', () => {
+    setHistoryNavDisabled(true);
+    expect((document.getElementById('prevBtn') as HTMLButtonElement).disabled).toBe(true);
+    expect((document.getElementById('nextBtn') as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('sets aria-disabled="true" on both buttons', () => {
+    setHistoryNavDisabled(true);
+    expect(document.getElementById('prevBtn')?.getAttribute('aria-disabled')).toBe('true');
+    expect(document.getElementById('nextBtn')?.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('hides the history counter when disabled', () => {
+    // Make counter visible first
+    const counter = document.querySelector('.history-counter') as HTMLElement;
+    counter.hidden = false;
+    setHistoryNavDisabled(true);
+    expect(counter.hidden).toBe(true);
+  });
+
+  it('re-enables prevBtn and nextBtn when disabled=false', () => {
+    setHistoryNavDisabled(true);
+    setHistoryNavDisabled(false);
+    expect((document.getElementById('prevBtn') as HTMLButtonElement).disabled).toBe(false);
+    expect((document.getElementById('nextBtn') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('sets aria-disabled="false" when re-enabled', () => {
+    setHistoryNavDisabled(true);
+    setHistoryNavDisabled(false);
+    expect(document.getElementById('prevBtn')?.getAttribute('aria-disabled')).toBe('false');
+    expect(document.getElementById('nextBtn')?.getAttribute('aria-disabled')).toBe('false');
+  });
+
+  it('shows the history counter when disabled=false', () => {
+    const counter = document.querySelector('.history-counter') as HTMLElement;
+    counter.hidden = true;
+    setHistoryNavDisabled(false);
+    expect(counter.hidden).toBe(false);
+  });
+
+  it('does not throw when buttons are missing', () => {
+    document.getElementById('prevBtn')?.remove();
+    document.getElementById('nextBtn')?.remove();
+    document.querySelector('.history-counter')?.remove();
+    expect(() => setHistoryNavDisabled(true)).not.toThrow();
   });
 });

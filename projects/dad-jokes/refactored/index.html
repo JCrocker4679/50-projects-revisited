@@ -42,6 +42,28 @@
     >☾</button>
     <main class="container" role="main">
       <h1 class="title">Don't Laugh Challenge</h1>
+      <form id="searchForm" class="search-form" role="search">
+        <label for="searchInput" class="sr-only">Search jokes by keyword</label>
+        <div class="search-input-row">
+          <input
+            id="searchInput"
+            class="search-input"
+            type="search"
+            placeholder="Search jokes..."
+            autocomplete="off"
+          />
+          <button id="searchBtn" class="btn search-btn" type="submit" aria-label="Search for jokes">Search</button>
+          <button
+            id="searchClearBtn"
+            class="btn btn--icon search-clear"
+            type="button"
+            aria-label="Clear search"
+            hidden
+          >✕</button>
+        </div>
+      </form>
+      <p id="searchMeta" class="search-meta" role="status" aria-live="polite" hidden></p>
+      <ul id="searchResults" class="search-results" aria-label="Search results" hidden></ul>
       <p
         class="joke"
         id="joke"
