@@ -8,6 +8,7 @@
  * - getFavourites / isFavourited / toggleFavourite
  * - addToHistory / getHistory / navigateHistory / isAtHistoryStart / isAtHistoryEnd
  * - initRatings / getRating / setRating
+ * - setSearchResults / selectSearchResult / clearSearch / getSearchState / isSearchActive
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -32,6 +33,11 @@ import {
   initRatings,
   getRating,
   setRating,
+  isSearchActive,
+  getSearchState,
+  setSearchResults,
+  selectSearchResult,
+  clearSearch,
 } from '../state.ts';
 
 // Mock storage so state tests don't depend on localStorage
@@ -266,5 +272,125 @@ describe('State: ratings', () => {
     setRating('joke-1', 'up');
     initRatings(); // mock returns {}
     expect(getRating('joke-1')).toBeNull();
+  });
+});
+
+const SEARCH_JOKES = [
+  { id: 's1', joke: 'Cat joke 1' },
+  { id: 's2', joke: 'Cat joke 2' },
+];
+
+describe('State: search', () => {
+  beforeEach(() => {
+    clearSearch();
+  });
+
+  it('isSearchActive() returns false initially', () => {
+    expect(isSearchActive()).toBe(false);
+  });
+
+  it('getSearchState() returns inactive state initially', () => {
+    expect(getSearchState()).toEqual({
+      isSearchActive: false,
+      searchTerm: '',
+      searchResults: [],
+      selectedSearchIndex: null,
+    });
+  });
+
+  describe('setSearchResults()', () => {
+    it('sets isSearchActive to true', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      expect(isSearchActive()).toBe(true);
+    });
+
+    it('stores results and term', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      const s = getSearchState();
+      expect(s.searchResults).toEqual(SEARCH_JOKES);
+      expect(s.searchTerm).toBe('cat');
+    });
+
+    it('sets selectedSearchIndex to 0 when results are non-empty', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      expect(getSearchState().selectedSearchIndex).toBe(0);
+    });
+
+    it('sets selectedSearchIndex to null when results are empty', () => {
+      setSearchResults([], 'zzz');
+      expect(getSearchState().selectedSearchIndex).toBeNull();
+    });
+
+    it('sets currentJoke to the first result', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      expect(getCurrentJoke()).toEqual(SEARCH_JOKES[0]);
+    });
+
+    it('does not change currentJoke when results are empty', () => {
+      setCurrentJoke({ id: 'before', joke: 'Before' });
+      setSearchResults([], 'zzz');
+      expect(getCurrentJoke()?.id).toBe('before');
+    });
+  });
+
+  describe('selectSearchResult()', () => {
+    beforeEach(() => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+    });
+
+    it('updates selectedSearchIndex and currentJoke', () => {
+      selectSearchResult(1);
+      expect(getSearchState().selectedSearchIndex).toBe(1);
+      expect(getCurrentJoke()).toEqual(SEARCH_JOKES[1]);
+    });
+
+    it('ignores out-of-range index (negative)', () => {
+      selectSearchResult(-1);
+      expect(getSearchState().selectedSearchIndex).toBe(0); // unchanged
+    });
+
+    it('ignores out-of-range index (too large)', () => {
+      selectSearchResult(99);
+      expect(getSearchState().selectedSearchIndex).toBe(0); // unchanged
+    });
+  });
+
+  describe('clearSearch()', () => {
+    it('resets all search state', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      clearSearch();
+      expect(getSearchState()).toEqual({
+        isSearchActive: false,
+        searchTerm: '',
+        searchResults: [],
+        selectedSearchIndex: null,
+      });
+    });
+
+    it('isSearchActive() returns false after clearSearch', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      clearSearch();
+      expect(isSearchActive()).toBe(false);
+    });
+  });
+
+  describe('navigateHistory() blocked when search is active', () => {
+    beforeEach(() => {
+      initHistory();
+      addToHistory({ id: 'h1', joke: 'History 1' });
+      addToHistory({ id: 'h2', joke: 'History 2' });
+    });
+
+    it('returns null while isSearchActive is true', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      expect(navigateHistory('back')).toBeNull();
+    });
+
+    it('navigates normally after clearSearch', () => {
+      setSearchResults(SEARCH_JOKES, 'cat');
+      clearSearch();
+      const joke = navigateHistory('back');
+      expect(joke?.id).toBe('h1');
+    });
   });
 });
