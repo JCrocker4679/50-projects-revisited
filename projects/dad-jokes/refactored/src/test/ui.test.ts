@@ -10,6 +10,7 @@
  * - showCopyFeedback() / setCopyButtonEnabled() / setShareButtonEnabled() — action buttons
  * - updateFavouriteButton() — favourite button state
  * - updateFavouritesCount() / toggleFavouritesPanel() / renderFavouritesList() — favourites panel
+ * - updateThemeToggle() — dark mode toggle button state (#69)
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -28,6 +29,7 @@ import {
   toggleFavouritesPanel,
   renderFavouritesList,
   updateRatingButtons,
+  updateThemeToggle,
 } from '../ui.ts';
 
 /** Standard DOM fixture for all UI tests */
@@ -599,5 +601,35 @@ describe('UI: updateRatingButtons()', () => {
     document.getElementById('thumbsUpBtn')?.remove();
     document.getElementById('thumbsDownBtn')?.remove();
     expect(() => updateRatingButtons('up')).not.toThrow();
+  });
+});
+
+// ===== updateThemeToggle =====
+
+describe('UI: updateThemeToggle()', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <button id="themeToggleBtn" aria-pressed="false" aria-label="Switch to dark mode">☾</button>
+    `;
+  });
+
+  it('sets aria-pressed="true" and label "Switch to light mode" when theme is dark', () => {
+    updateThemeToggle('dark');
+    const btn = document.getElementById('themeToggleBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('true');
+    expect(btn?.getAttribute('aria-label')).toBe('Switch to light mode');
+  });
+
+  it('sets aria-pressed="false" and label "Switch to dark mode" when theme is light', () => {
+    updateThemeToggle('dark'); // set to dark first
+    updateThemeToggle('light');
+    const btn = document.getElementById('themeToggleBtn');
+    expect(btn?.getAttribute('aria-pressed')).toBe('false');
+    expect(btn?.getAttribute('aria-label')).toBe('Switch to dark mode');
+  });
+
+  it('does not throw when button is missing', () => {
+    document.getElementById('themeToggleBtn')?.remove();
+    expect(() => updateThemeToggle('dark')).not.toThrow();
   });
 });
