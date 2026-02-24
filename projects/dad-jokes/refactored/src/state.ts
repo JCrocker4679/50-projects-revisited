@@ -12,6 +12,10 @@ const state: AppState = {
   historyIndex: 0,
   favourites: [],
   ratings: {},
+  isSearchActive: false,
+  searchTerm: '',
+  searchResults: [],
+  selectedSearchIndex: null,
 };
 
 // --- Current joke ---
@@ -66,6 +70,8 @@ export function addToHistory(joke: Joke): void {
 }
 
 export function navigateHistory(direction: 'back' | 'forward'): Joke | null {
+  if (state.isSearchActive) return null;
+
   const newIndex =
     direction === 'back' ? state.historyIndex + 1 : state.historyIndex - 1;
 
@@ -129,4 +135,42 @@ export function setRating(jokeId: string, rating: RatingValue): void {
     state.ratings[jokeId] = next;
   }
   saveRatings(state.ratings);
+}
+
+// --- Search ---
+
+export function isSearchActive(): boolean {
+  return state.isSearchActive;
+}
+
+export function getSearchState(): { isSearchActive: boolean; searchTerm: string; searchResults: Joke[]; selectedSearchIndex: number | null } {
+  return {
+    isSearchActive: state.isSearchActive,
+    searchTerm: state.searchTerm,
+    searchResults: state.searchResults,
+    selectedSearchIndex: state.selectedSearchIndex,
+  };
+}
+
+export function setSearchResults(results: Joke[], term: string): void {
+  state.isSearchActive = true;
+  state.searchTerm = term;
+  state.searchResults = results;
+  state.selectedSearchIndex = results.length > 0 ? 0 : null;
+  if (results.length > 0) {
+    state.currentJoke = results[0];
+  }
+}
+
+export function selectSearchResult(index: number): void {
+  if (index < 0 || index >= state.searchResults.length) return;
+  state.selectedSearchIndex = index;
+  state.currentJoke = state.searchResults[index];
+}
+
+export function clearSearch(): void {
+  state.isSearchActive = false;
+  state.searchTerm = '';
+  state.searchResults = [];
+  state.selectedSearchIndex = null;
 }

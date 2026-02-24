@@ -14,9 +14,9 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from './mocks/server.ts';
-import { fetchJoke, cancelActiveRequest, ApiError } from '../api.ts';
+import { fetchJoke, cancelActiveRequest, searchJokes, ApiError } from '../api.ts';
 import { API_URL, USER_AGENT } from '../constants.ts';
-import { MOCK_JOKE, lastRequest } from './mocks/handlers.ts';
+import { MOCK_JOKE, MOCK_SEARCH_RESPONSE, lastRequest } from './mocks/handlers.ts';
 
 describe('API client: fetchJoke()', () => {
   describe('successful requests', () => {
@@ -209,5 +209,90 @@ describe('ApiError class', () => {
     const error = new ApiError('test', 'validation');
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(ApiError);
+  });
+});
+
+describe('API client: searchJokes()', () => {
+  describe('successful search', () => {
+    it('returns SearchApiResponse with results array', async () => {
+      const result = await searchJokes('cat');
+      expect(result.results).toEqual(MOCK_SEARCH_RESPONSE.results);
+      expect(result.total_jokes).toBe(MOCK_SEARCH_RESPONSE.total_jokes);
+    });
+
+    it('includes search_term in response', async () => {
+      const result = await searchJokes('cat');
+      expect(result.search_term).toBe('cat');
+    });
+
+    it('sends Accept: application/json header', async () => {
+      await searchJokes('cat');
+      expect(lastRequest?.headers.get('Accept')).toBe('application/json');
+    });
+
+    it('sends User-Agent header', async () => {
+      await searchJokes('cat');
+      expect(lastRequest?.headers.get('User-Agent')).toBe(USER_AGENT);
+    });
+
+    it('URL-encodes the search term', async () => {
+      await searchJokes('cat');
+      expect(lastRequest?.url).toContain('term=cat');
+    });
+
+    it('includes limit parameter in URL', async () => {
+      await searchJokes('cat', 10);
+      expect(lastRequest?.url).toContain('limit=10');
+    });
+  });
+
+  describe('empty results', () => {
+    it('returns empty results array for a term with no matches (200, not an error)', async () => {
+      server.use(
+        http.get(`${API_URL}/search`, () => {
+          return HttpResponse.json({ ...MOCK_SEARCH_RESPONSE, results: [], total_jokes: 0 });
+        }),
+      );
+      const result = await searchJokes('zzz-no-match');
+      expect(result.results).toEqual([]);
+      expect(result.total_jokes).toBe(0);
+    });
+  });
+
+  describe('validation', () => {
+    it('throws ApiError with type "validation" for empty string', async () => {
+      await expect(searchJokes('')).rejects.toMatchObject({ type: 'validation' });
+    });
+
+    it('throws ApiError with type "validation" for whitespace-only string', async () => {
+      await expect(searchJokes('   ')).rejects.toMatchObject({ type: 'validation' });
+    });
+
+    it('throws ApiError with type "validation" when response has no results field', async () => {
+      server.use(
+        http.get(`${API_URL}/search`, () => {
+          return HttpResponse.json({ status: 200, total_jokes: 0 });
+        }),
+      );
+      await expect(searchJokes('cat')).rejects.toMatchObject({ type: 'validation' });
+    });
+  });
+
+  describe('HTTP errors', () => {
+    it('throws ApiError with type "http" on 500', async () => {
+      server.use(
+        http.get(`${API_URL}/search`, () => new HttpResponse(null, { status: 500 })),
+      );
+      await expect(searchJokes('cat')).rejects.toMatchObject({ type: 'http', status: 500 });
+    });
+  });
+
+  describe('network errors', () => {
+    it('throws ApiError with type "network" on network failure', async () => {
+      server.use(
+        http.get(`${API_URL}/search`, () => HttpResponse.error()),
+      );
+      await expect(searchJokes('cat')).rejects.toMatchObject({ type: 'network' });
+    });
   });
 });

@@ -1,5 +1,7 @@
 import { API_URL, USER_AGENT, REQUEST_TIMEOUT_MS } from './constants.ts';
-import type { Joke, ApiResponse } from './types.ts';
+import type { Joke, ApiResponse, SearchApiResponse } from './types.ts';
+
+const SEARCH_URL = `${API_URL}/search`;
 
 /**
  * Custom error class for API failures.
@@ -137,5 +139,78 @@ export async function fetchJoke(): Promise<Joke> {
   } finally {
     clearTimeout(timeoutId);
     activeController = null;
+  }
+}
+
+/**
+ * Type guard to validate search API response shape.
+ */
+function isValidSearchResponse(data: unknown): data is SearchApiResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'results' in data &&
+    Array.isArray((data as SearchApiResponse).results) &&
+    typeof (data as SearchApiResponse).total_jokes === 'number'
+  );
+}
+
+/**
+ * Search jokes by keyword using the icanhazdadjoke search endpoint.
+ *
+ * - Empty or whitespace-only terms are rejected immediately (validation error).
+ * - Returns up to `limit` results (default 20, API max 30).
+ * - A 200 with empty `results` array is a valid "no matches" response, not an error.
+ *
+ * @throws {ApiError} On network failure, HTTP error, timeout, or empty search term
+ */
+export async function searchJokes(term: string, limit = 20): Promise<SearchApiResponse> {
+  if (!term.trim()) {
+    throw new ApiError('Search term cannot be empty', 'validation');
+  }
+
+  const url = `${SEARCH_URL}?term=${encodeURIComponent(term.trim())}&limit=${limit}`;
+
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': USER_AGENT,
+      },
+      signal,
+    });
+
+    if (!res.ok) {
+      throw new ApiError(`Search API returned ${res.status}`, 'http', res.status);
+    }
+
+    const data: unknown = await res.json();
+
+    if (!isValidSearchResponse(data)) {
+      throw new ApiError('Search API returned unexpected data shape', 'validation');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new ApiError('Search request timed out', 'timeout');
+    }
+
+    if (error instanceof TypeError) {
+      throw new ApiError('Network error — check your connection', 'network');
+    }
+
+    throw new ApiError('Something went wrong searching for jokes', 'network');
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
